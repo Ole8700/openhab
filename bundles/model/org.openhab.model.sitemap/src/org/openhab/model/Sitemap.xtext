@@ -1,0 +1,37 @@
+grammar org.openhab.model.Sitemap with org.eclipse.xtext.common.Terminals
+
+generate sitemap "http://www.openhab.org/model/Sitemap"
+
+SitemapModel :
+	'sitemap' Sitemap;
+
+Sitemap :
+		name=ID ('label=' label=STRING)? ('icon=' icon=STRING)? '{'
+			(children+=Widget)+
+		'}';
+
+Widget :
+	(LinkableWidget | ((Switch | Selection) ('label=' label=(ID|STRING))? ('icon=' icon=(ID|STRING))?));	
+
+LinkableWidget :
+	(Text | Group | Image | Frame) ('label=' label=(ID|STRING))? ('icon=' icon=(ID|STRING))?
+	('{'
+			(children+=Widget)+
+	'}')?;
+
+Frame : 'Frame' {Frame} ('item=' item=ID)?;
+
+Text : 
+	'Text' {Text} ('item=' item=ID)?;
+	
+Group : 
+	'Group' ('item=' item=ID);
+
+Image : 
+	'Image' ('item=' item=ID)? ('url=' url=(STRING));
+	
+Switch : 
+	'Switch' ('item=' item=ID) ('buttonLabels=[' buttonLabels+=ID ']')?;
+	
+Selection : 
+	'Selection' ('item=' item=ID);
