@@ -9,6 +9,13 @@ Eclipse-RegisterBuddy: org.openhab.core.rules
 Bundle-ClassPath: lib/jl1.0.1.jar,
  .
 Import-Package: org.apache.commons.collections,
+ org.apache.commons.httpclient;version="3.1.0",
+ org.apache.commons.httpclient.auth,
+ org.apache.commons.httpclient.methods,
+ org.apache.commons.httpclient.params,
+ org.eclipse.persistence.oxm.annotations;version="2.1.1.v20100817-r8050",
+ org.osgi.service.cm;version="1.2.1",
  org.slf4j
 Export-Package: org.openhab.io.multimedia.actions
 Require-Bundle: org.openhab.core.rules;resolution:=optional
+Service-Component: OSGI-INF/musicpalaction.xml
