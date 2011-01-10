@@ -5,5 +5,36 @@ import org.openhab.core.library.items.SwitchItem
 import org.openhab.core.library.types.OnOffType
 import org.openhab.core.types.Command
 import org.openhab.io.multimedia.actions.Audio
+import org.openhab.io.multimedia.actions.MusicPal
 import org.openhab.io.net.actions.XMPP
 import org.openhab.io.net.actions.Mail
+import org.openhab.io.net.actions.Prowl
+
+rule "Standard Doorbell"
+	activation-group "doorbell"
+	salience -10
+	when
+		Item(name=="Doorbell", hasChanged==true, state==OnOffType.ON )
+	then
+		Audio.playSound("doorbell.mp3");
+end
+
+rule "Presence-aware Doorbell"
+	activation-group "doorbell"
+	salience 0
+	when
+		Item(name=="Doorbell", hasChanged==true, state==OnOffType.ON )
+		Item(name=="Presence", state==OnOffType.OFF ) 
+	then
+		XMPP.send("teichsta@gmail.com", "Somebody came to see you!");
+		Mail.sendMail("teichsta@gmail.com", "Somebody came to see you!", "", "http://i.telegraph.co.uk/telegraph/multimedia/archive/01374/cow-close-up_1374836i.jpg");
+end
+
+rule "Presence Notification"
+	when
+		presence : Item(name=="Presence", hasChanged==true)
+	then
+		XMPP.send("teichsta@gmail.com", "Presence changed to " + presence.getState());
+		Prowl.pushNotification("presence", "Presence changed to " + presence.getState());
+		MusicPal.power(presence.getState().toString());
+end

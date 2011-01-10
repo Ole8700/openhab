@@ -52,5 +52,9 @@
 <unit id="org.eclipse.xtext.sdk.feature.group" version="1.0.1.v201008251220"/>
 <repository location="http://download.eclipse.org/releases/helios/"/>
 </location>
+<location includeAllPlatforms="true" includeMode="slicer" type="InstallableUnit">
+<unit id="org.eclipse.persistence.sdk.feature.group" version="2.1.1.v20100817-r8050"/>
+<repository location="http://download.eclipse.org/releases/helios/"/>
+</location>
 </locations>
 </target>
