@@ -100,6 +100,9 @@ Contact Window_FF_Child 		"Window [%s]"		(FF_Child, Windows)
 
 Contact Garage_Door 			"Garage door [%s]"	(Garage, Windows)
 
+/* Scenes */
+Number Scene_General	"Scene;0=off;1=TV;2=Dinner;3=Reading"	<sofa>
+
 /* Status items */
 Switch Presence 										(Status)
 Switch Nightmode 										(Status)
