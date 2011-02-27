@@ -1,0 +1,75 @@
+<!DOCTYPE html>
+<html>
+	<head>
+		<title>%label%</title>
+       	<META HTTP-EQUIV="Content-type" CONTENT="text/html; charset=utf-8">
+   		<meta name="viewport" content="width=device-width; initial-scale=1.0; maximum-scale=1.0; user-scalable=0;" />
+		<meta name="apple-mobile-web-app-capable" content="yes" />
+		<link rel="apple-touch-startup-image" href="images/splash.png" />
+		<link rel="apple-touch-icon" href="images/icon.png" />
+		
+		<link rel="Stylesheet" type="text/css" href="WebApp/Design/Render.css" />
+		<link rel="Stylesheet" type="text/css" href="WebApp/Design/RenderRTL.css" />
+		<link rel="Stylesheet" type="text/css" href="WebApp/Design/Firefox.css">
+		<script type="text/javascript" src="WebApp/Action/Logic.js"></script>
+
+		<script>
+			WA.AddEventListener("endasync", function(evt) {
+				hash = document.location.hash.substring(2);
+				if(evt.context[0].indexOf(hash)>=0 || hash=="Home") {
+					if (evt.target.responseXML) {
+						if(evt.context[0].indexOf("poll=true")>=0) {
+							WA.Request(evt.context[0], null, -1, true, null);
+						}
+					}
+				}
+			});
+			
+			WA.AddEventListener("endslide", function(evt) {
+				hash = document.location.hash;
+				path = document.location.pathname;
+				if(document.location.search) {
+					search = document.location.search + "&";
+				} else {
+					search = "?";
+				}
+				search = search + "sitemap=%sitemap%&w=" + hash.substring(2) + "&poll=true";
+				url = path + search; 
+				WA.Request(url, null, -1, true, null);
+			});
+
+			WA.AddEventListener("load", function() {
+				setTimeout("WA.Request('../%servletname%?sitemap=%sitemap%&poll=true', null, -1, true, null)", 1500);
+			});
+			
+	        function ChangeState(request) {
+	            WA.Request(request, null, null);
+	        }
+	        
+	        function AsyncLoad(widgetId) {
+	            WA.Request("../%servletname%?sitemap=%sitemap%&w=" + widgetId, null, -1, true, null);
+	        }
+	        
+		</script>
+		
+	</head>
+	<body -dir="rtl"><div id="WebApp">
+	
+		<div id="iPL"></div>
+		<div id="iLoader"><span>Loading...</span></div>
+
+		<div id="iHeader">
+			<a href="#" id="waBackButton">Back</a>
+			<a href="#" id="waHomeButton">Home</a>
+			<a href="#" onclick="return WA.HideBar()"><span id="waHeadTitle">%label%</span></a>
+		</div>
+
+		<div id="iGroup">
+			<div class="iLayer" id="wa%id%" title="%id%">
+					%children%
+				<div class="iFooter">&copy;2010,2011 openHAB.org</div>
+			</div>
+			<div class="iLayer" id="waForm" title="Home"></div>
+		</div>
+	</body>
+</html>
