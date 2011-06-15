@@ -1,0 +1,42 @@
+Manifest-Version: 1.0
+Private-Package: org.openhab.binding.http.internal
+Ignore-Package: org.openhab.binding.http.internal
+Bundle-Name: openHAB Transformation Service
+Bundle-Vendor: openHAB.org
+Bundle-Version: 0.8.0.qualifier
+Bundle-Activator: org.openhab.core.transform.internal.TransformationActivator
+Bundle-ManifestVersion: 2
+Bundle-License: http://www.gnu.org/licenses/gpl.html
+Bundle-Description: This is the Transformation Service of the open Home Aut
+ omation Bus (openHAB)
+Import-Package: com.google.common.base,
+ com.google.common.collect,
+ org.apache.commons.collections,
+ org.apache.commons.collections.list,
+ org.apache.commons.httpclient,
+ org.apache.commons.httpclient.auth,
+ org.apache.commons.httpclient.methods,
+ org.apache.commons.httpclient.params,
+ org.apache.commons.io,
+ org.apache.commons.lang,
+ org.openhab.config.core,
+ org.openhab.core.binding,
+ org.openhab.core.events,
+ org.openhab.core.items,
+ org.openhab.core.library.items,
+ org.openhab.core.library.types,
+ org.openhab.core.types,
+ org.openhab.model.item.binding,
+ org.osgi.framework,
+ org.osgi.service.cm,
+ org.osgi.service.component,
+ org.osgi.service.event,
+ org.osgi.util.tracker,
+ org.slf4j
+Bundle-SymbolicName: org.openhab.core.transform
+Bundle-DocURL: http://www.openhab.org
+Bundle-RequiredExecutionEnvironment: J2SE-1.5
+Service-Component: OSGI-INF/regexservice.xml, OSGI-INF/xpathservice.xml, OSGI-INF/xsltservice.xml,
+ OSGI-INF/mapservice.xml
+Bundle-ClassPath: .
+Export-Package: org.openhab.core.transform
