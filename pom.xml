@@ -57,7 +57,7 @@
   <description>This is the open Home Automation Bus (openHAB)</description>
 
   <properties>
-    <tycho-version>0.13.0-SNAPSHOT</tycho-version>    
+    <tycho-version>0.13.0</tycho-version>    
 		<tycho-groupid>org.eclipse.tycho</tycho-groupid>
 		<project.build.sourceEncoding>UTF-8</project.build.sourceEncoding>
   </properties>
@@ -251,6 +251,16 @@
 	    </snapshots>
 	  </pluginRepository>
   </pluginRepositories>
+
+	<repositories>
+	  <repository>
+	    <id>fornax-releases</id>
+	    <url>http://fornax-platform.org/nexus/content/groups/public</url>
+	    <snapshots>
+	    	<enabled>false</enabled>
+	    </snapshots>
+	  </repository>
+	</repositories>
 
 	<!-- dependencies, which are not available in a p2-repository -->
   <dependencies>

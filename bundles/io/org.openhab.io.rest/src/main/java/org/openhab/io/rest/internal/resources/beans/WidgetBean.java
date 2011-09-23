@@ -51,9 +51,18 @@ public class WidgetBean {
 	
 	public String label;
 	public String icon;
+
+	// widget-specific attributes
+	@XmlElement(name="mapping")
+	public List<MappingBean> mappings = new ArrayList<MappingBean>();
+	public Boolean switchSupport;
+	public String sendFrequency;
+	public String separator;
+
 	public ItemBean item;
 	public String link;
 	public PageBean linkedPage;
+
 
 	// only for frames, other linkable widgets link to a page
 	@XmlElement(name="widget")

@@ -108,7 +108,13 @@ public class FolderObserver extends Thread implements ManagedService {
 		while(!folderRefreshMap.isEmpty()) { // keep the thread running as long as there are folders to observe
 			try {
 				for(String foldername : folderRefreshMap.keySet()) {
-					if(refreshCount % folderRefreshMap.get(foldername) > 0) continue;
+					// if folder has been checked at least once and it is not time yet to refresh, skip
+					if( lastFileNames.get(foldername) != null  && 
+							(refreshCount % folderRefreshMap.get(foldername) > 0)) {										
+						logger.debug("skipping refresh of folder '{}' folderRefreshMap={}",
+								foldername, folderRefreshMap.get(foldername));
+						continue;
+					} 
 					
 					logger.debug("Refreshing folder '{}'", foldername);
 					checkFolder(foldername);
@@ -121,7 +127,7 @@ public class FolderObserver extends Thread implements ManagedService {
 			}			
 			try {
 				if(gcdRefresh <= 0) break;
-				synchronized(this) {
+				synchronized(FolderObserver.this) {
 					wait(gcdRefresh * 1000L);
 				}
 			} catch (InterruptedException e) {
@@ -211,8 +217,9 @@ public class FolderObserver extends Thread implements ManagedService {
 								this.start();
 							} else {
 								// make sure that we notify the sleeping thread and directly refresh the folders
-								synchronized (this) {
+								synchronized (FolderObserver.this) {
 									notify();
+									checkFolder(foldername);
 								}
 							}
 						} else {

@@ -42,7 +42,7 @@ public class RuleModelActivator implements BundleActivator {
 
 	public void start(BundleContext context) throws Exception {
 		new RulesStandaloneSetup().createInjectorAndDoEMFRegistration();
-		logger.info("Registered 'rule' configuration parser");		
+		logger.info("Started rule engine");		
 	}
 
 	public void stop(BundleContext context) throws Exception {

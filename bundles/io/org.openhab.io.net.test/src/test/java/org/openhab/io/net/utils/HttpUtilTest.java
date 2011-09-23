@@ -27,7 +27,7 @@
  * to convey the resulting work.
  */
 
-package org.openhab.binding.http.internal;
+package org.openhab.io.net.utils;
 
 import junit.framework.Assert;
 
@@ -37,6 +37,7 @@ import org.apache.commons.httpclient.methods.GetMethod;
 import org.apache.commons.httpclient.methods.PostMethod;
 import org.apache.commons.httpclient.methods.PutMethod;
 import org.junit.Test;
+import org.openhab.io.net.utils.HttpUtil;
 
 
 /**
