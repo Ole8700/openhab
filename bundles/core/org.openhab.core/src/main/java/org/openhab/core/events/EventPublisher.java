@@ -33,10 +33,16 @@ import org.openhab.core.types.State;
 
 public interface EventPublisher {
 
-	public abstract void sendCommand(String itemName, Command command);
+	void sendCommand(String itemName, Command command);
 
-	public abstract void postCommand(String itemName, Command command);
+	void sendCommand(Object source, String itemName, Command command);
+	
+	void postCommand(String itemName, Command command);
 
-	public abstract void postUpdate(String itemName, State newState);
+	void postCommand(Object source, String itemName, Command command);
+	
+	void postUpdate(String itemName, State newState);
 
+	void postUpdate(Object source, String itemName, State newState);
+	
 }

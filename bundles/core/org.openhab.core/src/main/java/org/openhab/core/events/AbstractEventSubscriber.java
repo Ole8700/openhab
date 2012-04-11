@@ -43,6 +43,7 @@ abstract public class AbstractEventSubscriber implements EventSubscriber, EventH
 	 * {@inheritDoc}
 	 */
 	public void handleEvent(Event event) {  
+		Object source = event.getProperty("source");
 		String itemName = (String) event.getProperty("item");
 		
 		String topic = event.getTopic();
@@ -55,11 +56,11 @@ abstract public class AbstractEventSubscriber implements EventSubscriber, EventH
 		
 		if(operation.equals(EventType.UPDATE.toString())) {
 			State newState = (State) event.getProperty("state");
-			if(newState!=null) receiveUpdate(itemName, newState);
+			if(newState!=null) receiveUpdate(source, itemName, newState);
 		}
 		if(operation.equals(EventType.COMMAND.toString())) {
 			Command command = (Command) event.getProperty("command");
-			if(command!=null) receiveCommand(itemName, command);
+			if(command!=null) receiveCommand(source, itemName, command);
 		}
 	}
 	
@@ -69,6 +70,13 @@ abstract public class AbstractEventSubscriber implements EventSubscriber, EventH
 	public void receiveCommand(String itemName, Command command) {
 		// default implementation: do nothing
 	}
+	
+	/**
+	 * {@inheritDoc}
+	 */
+	public void receiveCommand(Object source, String itemName, Command command) {
+		receiveCommand(itemName, command);
+	}
 
 	/**
 	 * {@inheritDoc}
@@ -77,4 +85,11 @@ abstract public class AbstractEventSubscriber implements EventSubscriber, EventH
 		// default implementation: do nothing
 	}
 
+	/**
+	 * {@inheritDoc}
+	 */
+	public void receiveUpdate(Object source, String itemName, State newState) {
+		receiveUpdate(itemName, newState);
+	}
+	
 }

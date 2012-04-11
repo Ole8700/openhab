@@ -33,8 +33,12 @@ import org.openhab.core.types.State;
 
 public interface EventSubscriber {
 
-	public void receiveCommand(String itemName, Command command);
+	void receiveCommand(String itemName, Command command);
 	
-	public void receiveUpdate(String itemName, State newStatus);
+	void receiveCommand(Object source, String itemName, Command command);
+	
+	void receiveUpdate(String itemName, State newStatus);
 
+	void receiveUpdate(Object source, String itemName, State newStatus);
+	
 }

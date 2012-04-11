@@ -43,13 +43,12 @@ import org.hampelratte.svdrp.commands.VOLU;
 import org.openhab.binding.vdr.VDRBindingProvider;
 import org.openhab.binding.vdr.VDRCommandType;
 import org.openhab.core.events.AbstractEventSubscriberBinding;
-import org.openhab.core.events.EventSubscriber;
 import org.openhab.core.types.Command;
 import org.osgi.service.cm.ConfigurationException;
 import org.osgi.service.cm.ManagedService;
-import org.osgi.service.event.EventHandler;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
+
 
 /**
  * The VDR binding connects to a VDR on the svdr port. The following features
@@ -61,10 +60,7 @@ import org.slf4j.LoggerFactory;
  * @author Wolfgang Willinghoefer
  * @since 0.9.0
  */
-
-public class VDRBinding extends
-		AbstractEventSubscriberBinding<VDRBindingProvider> implements
-		EventSubscriber, EventHandler, ManagedService {
+public class VDRBinding extends	AbstractEventSubscriberBinding<VDRBindingProvider> implements ManagedService {
 
 	private static final Logger logger = LoggerFactory.getLogger(VDRBinding.class);
 

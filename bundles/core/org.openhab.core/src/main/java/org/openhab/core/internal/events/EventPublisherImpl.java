@@ -65,32 +65,59 @@ public class EventPublisherImpl implements EventPublisher {
 	 * @see org.openhab.core.internal.events.EventPublisher#sendCommand(org.openhab.core.items.GenericItem, org.openhab.core.datatypes.DataType)
 	 */
 	public void sendCommand(String itemName, Command command) {
-		if(eventAdmin!=null) eventAdmin.sendEvent(createCommandEvent(itemName, command));
+		if(eventAdmin!=null) eventAdmin.sendEvent(createCommandEvent(null, itemName, command));
 	}
 
+	/* (non-Javadoc)
+	 * @see org.openhab.core.internal.events.EventPublisher#sendCommand(java.lang.Object, org.openhab.core.items.GenericItem, org.openhab.core.datatypes.DataType)
+	 */
+	public void sendCommand(Object source, String itemName, Command command) {
+		if(eventAdmin!=null) eventAdmin.sendEvent(createCommandEvent(source, itemName, command));
+	}
+	
 	/* (non-Javadoc)
 	 * @see org.openhab.core.internal.events.EventPublisher#postCommand(org.openhab.core.items.GenericItem, org.openhab.core.datatypes.DataType)
 	 */
 	public void postCommand(String itemName, Command command) {
-		if(eventAdmin!=null) eventAdmin.postEvent(createCommandEvent(itemName, command));
+		if(eventAdmin!=null) eventAdmin.postEvent(createCommandEvent(null, itemName, command));
+	}
+
+	/* (non-Javadoc)
+	 * @see org.openhab.core.internal.events.EventPublisher#postCommand(java.lang.Object, org.openhab.core.items.GenericItem, org.openhab.core.datatypes.DataType)
+	 */
+	public void postCommand(Object source, String itemName, Command command) {
+		if(eventAdmin!=null) eventAdmin.postEvent(createCommandEvent(source, itemName, command));
 	}
 
 	/* (non-Javadoc)
 	 * @see org.openhab.core.internal.events.EventPublisher#postUpdate(org.openhab.core.items.GenericItem, org.openhab.core.datatypes.DataType)
 	 */
 	public void postUpdate(String itemName, State newState) {
-		if(eventAdmin!=null) eventAdmin.postEvent(createUpdateEvent(itemName, newState));
+		if(eventAdmin!=null) eventAdmin.postEvent(createUpdateEvent(null, itemName, newState));
 	}
 	
-	private Event createUpdateEvent(String itemName, State newState) {
+	/* (non-Javadoc)
+	 * @see org.openhab.core.internal.events.EventPublisher#postUpdate(java.lang.Object, org.openhab.core.items.GenericItem, org.openhab.core.datatypes.DataType)
+	 */
+	public void postUpdate(Object source, String itemName, State newState) {
+		if(eventAdmin!=null) eventAdmin.postEvent(createUpdateEvent(source, itemName, newState));
+	}
+	
+	private Event createUpdateEvent(Object source, String itemName, State newState) {
 		Dictionary<String, Object> properties = new Hashtable<String, Object>();
+		if (source != null) {
+			properties.put("source", source);
+		}
 		properties.put("item", itemName);
 		properties.put("state", newState);
 		return new Event(createTopic(EventType.UPDATE, itemName), properties);
 	}
 
-	private Event createCommandEvent(String itemName, Command command) {
+	private Event createCommandEvent(Object source, String itemName, Command command) {
 		Dictionary<String, Object> properties = new Hashtable<String, Object>();
+		if (source != null) {
+			properties.put("source", source);
+		}
 		properties.put("item", itemName);
 		properties.put("command", command);
 		return new Event(createTopic(EventType.COMMAND, itemName) , properties);
