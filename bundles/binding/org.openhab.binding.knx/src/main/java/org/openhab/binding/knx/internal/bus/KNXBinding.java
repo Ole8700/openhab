@@ -82,12 +82,7 @@ public class KNXBinding extends AbstractEventSubscriber implements ProcessListen
 	protected Collection<KNXTypeMapper> typeMappers = new HashSet<KNXTypeMapper>();
 
 	private EventPublisher eventPublisher;
-
-	/**
-	 * used to store events that we have sent ourselves; we need to remember them for not reacting to them
-	 */
-	private List<String> ignoreEventList = new ArrayList<String>();
-
+	
 	/**
 	 * to keep track of all datapoints for which we should send a read request to the KNX bus
 	 */
@@ -140,10 +135,9 @@ public class KNXBinding extends AbstractEventSubscriber implements ProcessListen
 	 * {@inheritDoc}
 	 */
 	@Override
-	public void receiveCommand(String itemName, Command command) {
+	public void receiveCommand(Object source, String itemName, Command command) {
 		String ignoreEventListKey = itemName + command.toString();
-		if (ignoreEventList.contains(ignoreEventListKey)) {
-			ignoreEventList.remove(ignoreEventListKey);
+		if (this.equals(source)) {
 			logger.trace("we received this command (item='{}', state='{}') from KNX, so we don't send it back again -> ignore!", itemName, command.toString());
 		} else {
 			Iterable<Datapoint> datapoints = getDatapoints(itemName, command.getClass());
@@ -177,10 +171,8 @@ public class KNXBinding extends AbstractEventSubscriber implements ProcessListen
 	 * {@inheritDoc}
 	 */
 	@Override
-	public void receiveUpdate(String itemName, State newState) {
-		String ignoreEventListKey = itemName + newState.toString();
-		if (ignoreEventList.contains(ignoreEventListKey)) {
-			ignoreEventList.remove(ignoreEventListKey);
+	public void receiveUpdate(Object source, String itemName, State newState) {
+		if (this.equals(source)) {
 			logger.trace("we received this update (item='{}', state='{}') from KNX, so we don't send it back again -> ignore!", itemName, newState.toString());
 		} else {
 			Iterable<Datapoint> datapoints = getDatapoints(itemName, newState.getClass());
@@ -190,9 +182,6 @@ public class KNXBinding extends AbstractEventSubscriber implements ProcessListen
 					for (Datapoint datapoint : datapoints) {
 						try {
 							pc.write(datapoint, toDPTValue(newState, datapoint.getDPT()));
-							// after sending this out to KNX, we need to make sure that we do not
-							// react on our own update
-							ignoreEventList.add(ignoreEventListKey);
 							
 							if (logger.isDebugEnabled()) {
 								logger.debug("wrote value '{}' to datapoint '{}'", newState, datapoint);
@@ -223,28 +212,18 @@ public class KNXBinding extends AbstractEventSubscriber implements ProcessListen
 					for (Datapoint datapoint : datapoints) {
 						Type type = getType(datapoint, asdu);					
 						if (type!=null) {
-							if (ignoreEventList.contains(itemName + type.toString())) {
-								// if we have send this event ourselves to KNX, 
-								// ignore the echo now
-								ignoreEventList.remove(itemName + type.toString());
-								logger.trace("Received event (item='{}', type='{}') is identified as echo to our own request -> ignore!", itemName, type.toString());
+							if (type instanceof Command && isCommandGA(destination)) {
+								eventPublisher.postCommand(this, itemName, (Command) type);
+							} else if (type instanceof State) {
+								eventPublisher.postUpdate(this, itemName, (State) type);
 							} else {
-								// we need to make sure that we won't send out this event to
-								// the knx bus again, when receiving it on the openHAB bus
-								ignoreEventList.add(itemName + type.toString());
-					
-								if (type instanceof Command && isCommandGA(destination)) {
-									eventPublisher.postCommand(itemName, (Command) type);
-								} else if (type instanceof State) {
-									eventPublisher.postUpdate(itemName, (State) type);
-								} else {
-									throw new IllegalClassException("cannot process datapoint of type " + type.toString());
-								}
-								
-								if(logger.isTraceEnabled()) {
-									logger.trace("Processed event: " + destination.toString() + ":" + type.toString() + " -> " + itemName);
-								}
+								throw new IllegalClassException("cannot process datapoint of type " + type.toString());
 							}
+							
+							if(logger.isTraceEnabled()) {
+								logger.trace("Processed event: " + destination.toString() + ":" + type.toString() + " -> " + itemName);
+							}
+							
 							return;
 						}
 					}
