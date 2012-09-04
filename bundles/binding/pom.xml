@@ -1,0 +1,40 @@
+<?xml version="1.0" encoding="MACROMAN"?>
+<project xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xmlns="http://maven.apache.org/POM/4.0.0" xsi:schemaLocation="http://maven.apache.org/POM/4.0.0 http://maven.apache.org/maven-v4_0_0.xsd">
+
+  <parent>
+    <groupId>org.openhab</groupId>
+    <artifactId>bundles</artifactId>
+    <version>1.1.0-SNAPSHOT</version>
+  </parent>
+
+  <modelVersion>4.0.0</modelVersion>
+  <groupId>org.openhab.bundles</groupId>
+  <artifactId>binding</artifactId>
+
+  <name>openHAB Bindings</name>
+
+  <packaging>pom</packaging>
+
+  <modules>
+    <module>org.openhab.binding.bluetooth</module>
+    <module>org.openhab.binding.knx</module>
+    <module>org.openhab.binding.knx.test</module>
+    <module>org.openhab.binding.serial</module>
+    <module>org.openhab.binding.onewire</module>
+    <module>org.openhab.binding.wol</module>
+    <module>org.openhab.binding.networkhealth</module>
+    <module>org.openhab.binding.exec</module>
+    <module>org.openhab.binding.exec.test</module>
+    <module>org.openhab.binding.http</module>
+    <module>org.openhab.binding.http.test</module>
+    <module>org.openhab.binding.fritzbox</module>
+    <module>org.openhab.binding.ntp</module>
+    <module>org.openhab.binding.mpd</module>
+    <module>org.openhab.binding.vdr</module>
+    <module>org.openhab.binding.asterisk</module>
+    <module>org.openhab.binding.snmp</module>
+    <module>org.openhab.binding.configadmin</module>
+    <module>org.openhab.binding.novelanheatpump</module>
+  </modules>
+
+</project>
