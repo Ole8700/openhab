@@ -33,7 +33,13 @@ import java.util.Dictionary;
 import org.apache.commons.lang.StringUtils;
 import org.openhab.binding.koubachi.KoubachiBindingProvider;
 import org.openhab.core.binding.AbstractActiveBinding;
+import org.openhab.core.items.Item;
+import org.openhab.core.library.items.NumberItem;
+import org.openhab.core.library.items.StringItem;
+import org.openhab.core.library.items.SwitchItem;
+import org.openhab.core.library.types.DecimalType;
 import org.openhab.core.library.types.OnOffType;
+import org.openhab.core.library.types.StringType;
 import org.openhab.core.transform.TransformationException;
 import org.openhab.core.transform.TransformationHelper;
 import org.openhab.core.transform.TransformationService;
@@ -110,29 +116,34 @@ public class KoubachiBinding extends AbstractActiveBinding<KoubachiBindingProvid
 		for (KoubachiBindingProvider provider : providers) {
 			for (String itemName : provider.getItemNames()) {
 				
-				String plantId = provider.getPlantId(itemName);
-				String url = apiBaseUrl + "plants/" + plantId + "?user_credentials=" + credentials +"&app_key=" + appKey;
+				String resourceId = provider.getResourceId(itemName);
+				String url = apiBaseUrl + "user/smart_devices/" + resourceId + "?user_credentials=" + credentials +"&app_key=" + appKey;
 				
 				String response = HttpUtil.executeUrl("GET", url, null, "application/xml", 5000);
 
 				if(response==null) {
 					logger.error("No response received from '{}'", url);
 				} else {
-					String transformationFunction = provider.getTransformExpression(itemName);
+					String command = provider.getCommand(itemName);
+
+					KoubachiCommandMapping mapping = 
+						KoubachiCommandMapping.valueOf(command.toUpperCase());
+
+					String transformFunction = mapping.getXpath();
 					String transformedResponse;
 					
 					try {
 						TransformationService transformationService = 
 							TransformationHelper.getTransformationService(KoubachiActivator.getContext(), "XPATH");
 						if (transformationService != null) {
-							transformedResponse = transformationService.transform(transformationFunction, response);
+							transformedResponse = transformationService.transform(transformFunction, response);
 						} else {
 							transformedResponse = response;
 							logger.warn("couldn't transform response because transformationService of type 'XPATH' is unavailable");
 						}
 					}
 					catch (TransformationException te) {
-						logger.error("transformation throws exception [transformation=" + transformationFunction + ", response=" + response + "]", te);
+						logger.error("transformation throws exception [transformation=" + transformFunction + ", response=" + response + "]", te);
 						
 						// in case of an error we return the response without any
 						// transformation
@@ -142,8 +153,7 @@ public class KoubachiBinding extends AbstractActiveBinding<KoubachiBindingProvid
 					if (StringUtils.isNotBlank(transformedResponse)) {
 						logger.debug("transformed response is '{}'", transformedResponse);
 						
-						State state = transformedResponse.equals("true") ? OnOffType.ON : OnOffType.OFF;
-						
+						State state = createState(mapping.getItemType(), transformedResponse);
 						if (state != null) {
 							eventPublisher.postUpdate(itemName, state);
 						}
@@ -152,6 +162,19 @@ public class KoubachiBinding extends AbstractActiveBinding<KoubachiBindingProvid
 					}
 				}
 			}
+		}
+	}
+	
+	private State createState(Class<? extends Item> itemType, String value) {
+		if (StringItem.class.equals(itemType)) {
+			return new StringType(value);
+		} else if (NumberItem.class.equals(itemType)) {
+			value = value.replaceAll("[^\\d|.]", "");
+			return new DecimalType(value);
+		} else if (SwitchItem.class.equals(itemType)) {
+			return value.equals("true") ? OnOffType.ON : OnOffType.OFF;
+		} else {
+			return null;
 		}
 	}
 	
