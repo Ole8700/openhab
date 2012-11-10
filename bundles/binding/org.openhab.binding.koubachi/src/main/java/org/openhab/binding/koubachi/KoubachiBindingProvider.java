@@ -37,8 +37,8 @@ import org.openhab.core.binding.BindingProvider;
  */
 public interface KoubachiBindingProvider extends BindingProvider {
 	
-	String getPlantId(String itemName);
+	String getResourceId(String itemName);
 
-	String getTransformExpression(String itemName);	
+	String getCommand(String itemName);	
 
 }

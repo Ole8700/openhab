@@ -31,6 +31,8 @@ package org.openhab.binding.koubachi.internal;
 import org.openhab.binding.koubachi.KoubachiBindingProvider;
 import org.openhab.core.binding.BindingConfig;
 import org.openhab.core.items.Item;
+import org.openhab.core.library.items.NumberItem;
+import org.openhab.core.library.items.StringItem;
 import org.openhab.core.library.items.SwitchItem;
 import org.openhab.model.item.binding.AbstractGenericBindingProvider;
 import org.openhab.model.item.binding.BindingConfigParseException;
@@ -39,7 +41,7 @@ import org.openhab.model.item.binding.BindingConfigParseException;
 /**
  * <p>Here are some examples for valid binding configuration strings:
  * <ul>
- * 	<li><code>{ koubachi="&lt;plantId&gt;:/plant/vdm-light-pending" }</code></li>
+ * 	<li><code>{ koubachi="&lt;resourceId&gt;:/plant/vdm-light-pending" }</code></li>
  * </ul>
  * 
  * @author Thomas.Eichstaedt-Engelen
@@ -59,10 +61,10 @@ public class KoubachiGenericBindingProvider extends AbstractGenericBindingProvid
 	 */
 	@Override
 	public void validateItemType(Item item, String bindingConfig) throws BindingConfigParseException {
-		if (!(item instanceof SwitchItem)) {
+		if (!(item instanceof SwitchItem || item instanceof NumberItem || item instanceof StringItem)) {
 			throw new BindingConfigParseException("item '" + item.getName()
 					+ "' is of type '" + item.getClass().getSimpleName()
-					+ "', only SwitchItems are allowed - please check your *.items configuration");
+					+ "', only Switch-, Number- and StringItems are allowed - please check your *.items configuration");
 		}
 	}
 	
@@ -79,8 +81,8 @@ public class KoubachiGenericBindingProvider extends AbstractGenericBindingProvid
 		}
 		
 		KoubachiBindingConfig config = new KoubachiBindingConfig();
-		config.plantId = configParts[0];
-		config.transformExpression = configParts[1];
+		config.resourceId = configParts[0];
+		config.command = configParts[1];
 		
 		addBindingConfig(item, config);		
 	}
@@ -90,18 +92,18 @@ public class KoubachiGenericBindingProvider extends AbstractGenericBindingProvid
 	 * {@inheritDoc}
 	 */
 	@Override
-	public String getPlantId(String itemName) {
+	public String getResourceId(String itemName) {
 		KoubachiBindingConfig config = (KoubachiBindingConfig) bindingConfigs.get(itemName);
-		return config != null ? config.plantId: null;
+		return config != null ? config.resourceId: null;
 	}
 	
 	/**
 	 * {@inheritDoc}
 	 */
 	@Override
-	public String getTransformExpression(String itemName) {
+	public String getCommand(String itemName) {
 		KoubachiBindingConfig config = (KoubachiBindingConfig) bindingConfigs.get(itemName);
-		return config != null ? config.transformExpression: null;
+		return config != null ? config.command: null;
 	}
 
 	
@@ -110,8 +112,8 @@ public class KoubachiGenericBindingProvider extends AbstractGenericBindingProvid
 	 * @since 1.1.0
 	 */
 	class KoubachiBindingConfig implements BindingConfig {
-		String plantId;
-		String transformExpression;
+		String resourceId;
+		String command;
 	}
 	
 	
