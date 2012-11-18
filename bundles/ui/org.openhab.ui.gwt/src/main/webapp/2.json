@@ -1,0 +1,29 @@
+{
+	"id": "2",
+	"title" : "ich bin seite 2",
+	"uiElements" : [ {
+		"id" : "id ui",
+		"label" : "frame ui",
+		"type"  : "frame",
+		"children" : [ {
+			"id" : "id ui1",
+			"label" : "label ui",
+			"type"  : "button",
+			"children" : [],
+			"actionId" : "3"	
+		}, {
+			"id" : "id u21",
+			"label" : "group ui",
+			"rightLabel" : "value 2",
+			"type"  : "group",
+			"icon" : "http://demo.openhab.org:8080/images/1stfloor.png",
+			"children" : []
+		}
+		
+		]
+	}]
+}
+
+
+
+
