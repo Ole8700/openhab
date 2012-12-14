@@ -30,10 +30,12 @@
 
 -->
 
-<scr:component xmlns:scr="http://www.osgi.org/xmlns/scr/v1.1.0" name="org.openhab.binding.koubachi.genericbindingprovider">
-   <implementation class="org.openhab.binding.koubachi.internal.KoubachiGenericBindingProvider"/>
+<scr:component xmlns:scr="http://www.osgi.org/xmlns/scr/v1.1.0" name="org.openhab.binding.koubachi.connector">
+   <implementation class="org.openhab.binding.koubachi.internal.api.KoubachiConnector"/>
+   
    <service>
-      <provide interface="org.openhab.model.item.binding.BindingConfigReader"/>
-      <provide interface="org.openhab.binding.koubachi.KoubachiBindingProvider"/>
+      <provide interface="org.osgi.service.cm.ManagedService"/>
    </service>
+
+   <property name="service.pid" type="String" value="org.openhab.koubachi"/>
 </scr:component>

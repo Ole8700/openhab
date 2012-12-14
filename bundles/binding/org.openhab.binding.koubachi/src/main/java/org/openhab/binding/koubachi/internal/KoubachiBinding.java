@@ -28,25 +28,18 @@
  */
 package org.openhab.binding.koubachi.internal;
 
-import java.util.Dictionary;
+import java.util.List;
 
-import org.apache.commons.lang.StringUtils;
 import org.openhab.binding.koubachi.KoubachiBindingProvider;
+import org.openhab.binding.koubachi.internal.api.Device;
+import org.openhab.binding.koubachi.internal.api.KoubachiConnector;
+import org.openhab.binding.koubachi.internal.api.KoubachiDeviceMapping;
+import org.openhab.binding.koubachi.internal.api.KoubachiPlantMapping;
+import org.openhab.binding.koubachi.internal.api.Plant;
 import org.openhab.core.binding.AbstractActiveBinding;
-import org.openhab.core.items.Item;
-import org.openhab.core.library.items.NumberItem;
-import org.openhab.core.library.items.StringItem;
-import org.openhab.core.library.items.SwitchItem;
 import org.openhab.core.library.types.DecimalType;
-import org.openhab.core.library.types.OnOffType;
 import org.openhab.core.library.types.StringType;
-import org.openhab.core.transform.TransformationException;
-import org.openhab.core.transform.TransformationHelper;
-import org.openhab.core.transform.TransformationService;
 import org.openhab.core.types.State;
-import org.openhab.io.net.http.HttpUtil;
-import org.osgi.service.cm.ConfigurationException;
-import org.osgi.service.cm.ManagedService;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 	
@@ -55,41 +48,17 @@ import org.slf4j.LoggerFactory;
  * @author Thomas.Eichstaedt-Engelen
  * @since 1.1.0
  */
-public class KoubachiBinding extends AbstractActiveBinding<KoubachiBindingProvider> implements ManagedService {
+public class KoubachiBinding extends AbstractActiveBinding<KoubachiBindingProvider> {
 
 	private static final Logger logger = 
-		LoggerFactory.getLogger(KoubachiBinding.class);
-
-	private boolean isProperlyConfigured = false;
-	
-	/** the refresh interval which is used to poll values from the Koubachi server (optional, defaults to 60000ms) */
-	private long refreshInterval = 60000;
-	
-	/** the  (optional, defaults to 'https://api.koubachi.com/v2/') */
-	private String apiBaseUrl = "https://api.koubachi.com/v2/";
-	
-	private String credentials;
-	
-	private String appKey;
-
-	
-	public KoubachiBinding() {
-	}
-	
-	
-	public void activate() {
-	}
-	
-	public void deactivate() {
-	}
-	
+		LoggerFactory.getLogger(KoubachiBinding.class);	
 	
 	/**
 	 * @{inheritDoc}
 	 */
 	@Override
 	protected long getRefreshInterval() {
-		return refreshInterval;
+		return 30000;
 	}
 
 	/**
@@ -105,7 +74,7 @@ public class KoubachiBinding extends AbstractActiveBinding<KoubachiBindingProvid
 	 */
 	@Override
 	public boolean isProperlyConfigured() {
-		return isProperlyConfigured;
+		return true;
 	}
 	
 	/**
@@ -113,98 +82,80 @@ public class KoubachiBinding extends AbstractActiveBinding<KoubachiBindingProvid
 	 */
 	@Override
 	protected void execute() {
+		
+		List<Device> devices = KoubachiConnector.getDevices();
+		List<Plant> plants = KoubachiConnector.getPlants();
+		
 		for (KoubachiBindingProvider provider : providers) {
 			for (String itemName : provider.getItemNames()) {
 				
-				String resourceId = provider.getResourceId(itemName);
-				String url = apiBaseUrl + "user/smart_devices/" + resourceId + "?user_credentials=" + credentials +"&app_key=" + appKey;
-				
-				String response = HttpUtil.executeUrl("GET", url, null, "application/xml", 5000);
-
-				if(response==null) {
-					logger.error("No response received from '{}'", url);
-				} else {
-					String command = provider.getCommand(itemName);
-
-					KoubachiCommandMapping mapping = 
-						KoubachiCommandMapping.valueOf(command.toUpperCase());
-
-					String transformFunction = mapping.getXpath();
-					String transformedResponse;
+				if (itemName.startsWith("Device")) {
+					KoubachiDeviceMapping deviceMapping = provider.getDeviceMappingBy(itemName);
+					Device device = findDevice(itemName, devices);
 					
-					try {
-						TransformationService transformationService = 
-							TransformationHelper.getTransformationService(KoubachiActivator.getContext(), "XPATH");
-						if (transformationService != null) {
-							transformedResponse = transformationService.transform(transformFunction, response);
-						} else {
-							transformedResponse = response;
-							logger.warn("couldn't transform response because transformationService of type 'XPATH' is unavailable");
-						}
-					}
-					catch (TransformationException te) {
-						logger.error("transformation throws exception [transformation=" + transformFunction + ", response=" + response + "]", te);
-						
-						// in case of an error we return the response without any
-						// transformation
-						transformedResponse = response;
-					}
-					
-					if (StringUtils.isNotBlank(transformedResponse)) {
-						logger.debug("transformed response is '{}'", transformedResponse);
-						
-						State state = createState(mapping.getItemType(), transformedResponse);
+					Object value = device.get(deviceMapping.getDataKey());
+					if (value != null) {
+						State state = createState(deviceMapping.getItemType(), value);
 						if (state != null) {
 							eventPublisher.postUpdate(itemName, state);
 						}
-					} else {
-						logger.debug("response is empty cannot convert into a proper state");
 					}
+				} else if (itemName.startsWith("Plant")){
+					KoubachiPlantMapping plantMapping = provider.getPlantMappingBy(itemName);
+					Plant plant = findPlant(itemName, plants);
+					
+					Object value = plant.get(plantMapping.getDataKey());
+					if (value != null) {
+						State state = createState(plantMapping.getItemType(), value);
+						if (state != null) {
+							eventPublisher.postUpdate(itemName, state);
+						}
+					}
+				} else {
+					throw new IllegalArgumentException("Item '" + itemName + "' cannot be processed");
 				}
 			}
 		}
 	}
 	
-	private State createState(Class<? extends Item> itemType, String value) {
-		if (StringItem.class.equals(itemType)) {
-			return new StringType(value);
-		} else if (NumberItem.class.equals(itemType)) {
-			value = value.replaceAll("[^\\d|.]", "");
-			return new DecimalType(value);
-		} else if (SwitchItem.class.equals(itemType)) {
-			return value.equals("true") ? OnOffType.ON : OnOffType.OFF;
+	private Device findDevice(String itemName, List<Device> devices) {
+		String[] itemNameElements = itemName.split("_");
+		String id = itemNameElements[1];
+		for (Device device : devices) {
+			if (device.getId().equals(id)) {
+				return device;
+			}
+		}
+		return null;
+	}
+	
+	private Plant findPlant(String itemName, List<Plant> plants) {
+		String[] itemNameElements = itemName.split("_");
+		Integer id = Integer.valueOf(itemNameElements[1]);
+		for (Plant plant : plants) {
+			if (plant.getId().equals(id)) {
+				return plant;
+			}
+		}
+		return null;
+	}
+	
+	private State createState(String itemType, Object value) {
+		if ("String".equals(itemType)) {
+			return new StringType((String) value);
+		} else if ("Number".equals(itemType)) {
+			if (value instanceof Number) {
+				return new DecimalType(value.toString());
+			} else if (value instanceof String) {
+				String stringValue = ((String) value).replaceAll("[^\\d|.]", "");
+				return new DecimalType(stringValue);
+			} else {
+				return null;
+			}
 		} else {
 			return null;
 		}
 	}
 	
-	
-	/**
-	 * @{inheritDoc}
-	 */
-	@Override
-	public void updated(Dictionary<String, ?> config) throws ConfigurationException {
-		if (config != null) {
-			String refreshIntervalString = (String) config.get("refresh");
-			if (StringUtils.isNotBlank(refreshIntervalString)) {
-				refreshInterval = Long.parseLong(refreshIntervalString);
-			}
-			String apiBaseUrlString = (String) config.get("apiurl");
-			if (StringUtils.isNotBlank(apiBaseUrlString)) {
-				apiBaseUrl = apiBaseUrlString;
-			}
-			credentials = (String) config.get("credentials");
-			if (StringUtils.isBlank(credentials)) {
-				throw new ConfigurationException("koubachi:credentials", "Users' credentials parameter must be set");
-			}
-			appKey = (String) config.get("appkey");
-			if (StringUtils.isBlank(appKey)) {
-				throw new ConfigurationException("koubachi:appkey", "AppKey parameter must be set");
-			}
-			
-			isProperlyConfigured = true;
-		}
-	}
-
 	
 }
