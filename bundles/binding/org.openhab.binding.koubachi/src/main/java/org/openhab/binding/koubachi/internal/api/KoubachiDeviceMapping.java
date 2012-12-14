@@ -26,27 +26,54 @@
  * (EPL), the licensors of this Program grant you additional permission
  * to convey the resulting work.
  */
-package org.openhab.binding.koubachi;
+package org.openhab.binding.koubachi.internal.api;
 
-import org.openhab.binding.koubachi.internal.api.KoubachiDeviceMapping;
-import org.openhab.binding.koubachi.internal.api.KoubachiPlantMapping;
-import org.openhab.core.binding.BindingProvider;
+import org.apache.commons.lang.StringUtils;
 
 
 /**
- * This interface is implemented by classes that can provide mapping information
- * between openHAB items and Koubachi items.
- * 
- * Implementing classes should register themselves as a service in order to be 
- * taken into account.
- * 
  * @author Thomas.Eichstaedt-Engelen
  * @since 1.1.0
  */
-public interface KoubachiBindingProvider extends BindingProvider {
+public enum KoubachiDeviceMapping implements KoubachiDataMapping {
 	
-	KoubachiDeviceMapping getDeviceMappingBy(String itemName);
+	ID("mac_address", "String"),
+	BATTERY_LEVEL("virtual_battery_level", "Number"),
 	
-	KoubachiPlantMapping getPlantMappingBy(String itemName);
+	//LAST_TRANSMISSION("last_transmission", "DateTime"),
+	//NEXT_TRANSMISSION("next_transmission", "DateTime"),
+	
+	SOILMOISTURE_VALUE("recent_soilmoisture_reading_value", "Number"),
+	TEMPERATURE_VALUE("recent_temperature_reading_value", "Number"),
+	LIGHT_VALUE("recent_light_reading_value", "Number");
+	
+	private String dataKey;
+	private String itemType;
+	
+	private KoubachiDeviceMapping(String dataKey, String itemType) {
+		this.dataKey = dataKey;
+		this.itemType = itemType;
+	}
+	
+	@Override
+	public String getDataKey() {
+		return dataKey;
+	}
 
+	@Override
+	public String getItemType() {
+		return itemType;
+	}
+	
+	public String getItemPostfix() {
+		String[] parts = getDataKey().split("_");
+		
+		String itemPostfix = "_";
+		for (String part : parts) {
+			itemPostfix += StringUtils.capitalize(part);
+		}
+		
+		return itemPostfix;
+	}
+	
 }

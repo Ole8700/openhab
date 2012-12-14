@@ -31,7 +31,6 @@ package org.openhab.model.item.internal;
 import java.util.ArrayList;
 import java.util.Collection;
 import java.util.HashMap;
-import java.util.HashSet;
 import java.util.List;
 import java.util.Map;
 
@@ -40,8 +39,6 @@ import org.openhab.core.items.GenericItem;
 import org.openhab.core.items.GroupFunction;
 import org.openhab.core.items.GroupItem;
 import org.openhab.core.items.Item;
-import org.openhab.core.items.ItemFactory;
-import org.openhab.core.items.ItemProvider;
 import org.openhab.core.items.ItemsChangeListener;
 import org.openhab.core.library.types.ArithmeticGroupFunction;
 import org.openhab.core.types.State;
@@ -50,6 +47,7 @@ import org.openhab.model.ItemsStandaloneSetup;
 import org.openhab.model.core.EventType;
 import org.openhab.model.core.ModelRepository;
 import org.openhab.model.core.ModelRepositoryChangeListener;
+import org.openhab.model.item.AbstractItemProvider;
 import org.openhab.model.item.binding.BindingConfigParseException;
 import org.openhab.model.item.binding.BindingConfigReader;
 import org.openhab.model.items.ItemModel;
@@ -61,8 +59,7 @@ import org.openhab.model.items.ModelNormalItem;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
-public class GenericItemProvider implements ItemProvider,
-		ModelRepositoryChangeListener {
+public class GenericItemProvider extends AbstractItemProvider implements ModelRepositoryChangeListener {
 
 	public GenericItemProvider() {
 		// make sure that the DSL is correctly registered with EMF before we
@@ -73,26 +70,12 @@ public class GenericItemProvider implements ItemProvider,
 	private static final Logger logger = 
 		LoggerFactory.getLogger(GenericItemProvider.class);
 
-	/** to keep track of all item change listeners */
-	private Collection<ItemsChangeListener> listeners = new HashSet<ItemsChangeListener>();
-
 	/** to keep track of all binding config readers */
 	private Map<String, BindingConfigReader> bindingConfigReaders = new HashMap<String, BindingConfigReader>();
 
 	private ModelRepository modelRepository = null;
 	
-	private Collection<ItemFactory> itemFactorys = new ArrayList<ItemFactory>();
 	
-	
-	public void addItemFactory(ItemFactory factory) {
-		itemFactorys.add(factory);
-	}
-	
-	public void removeItemFactory(ItemFactory factory) {
-		itemFactorys.remove(factory);
-	}
-	
-
 	public Collection<Item> getItems() {
 		List<Item> items = new ArrayList<Item>();
 		if (modelRepository != null) {
@@ -231,14 +214,6 @@ public class GenericItemProvider implements ItemProvider,
 		}
 	}
 
-	public void addItemChangeListener(ItemsChangeListener listener) {
-		listeners.add(listener);
-	}
-
-	public void removeItemChangeListener(ItemsChangeListener listener) {
-		listeners.remove(listener);
-	}
-
 	public void addBindingConfigReader(BindingConfigReader reader) {
 		if (!bindingConfigReaders.containsKey(reader.getBindingType())) {
 			bindingConfigReaders.put(reader.getBindingType(), reader);
@@ -271,20 +246,5 @@ public class GenericItemProvider implements ItemProvider,
 			}
 		}
 	}
-
-	protected GenericItem getItemOfType(String itemType, String itemName) {
-		if (itemType == null) {
-			return null;
-		}
-		
-		for (ItemFactory factory : itemFactorys) {
-			GenericItem item = factory.createItem(itemType, itemName);
-			if (item != null) {
-				return item;
-			}
-		}
-		
-		return null;
-	}
-
+	
 }

@@ -26,38 +26,57 @@
  * (EPL), the licensors of this Program grant you additional permission
  * to convey the resulting work.
  */
-package org.openhab.binding.koubachi.internal;
+package org.openhab.binding.koubachi.internal.api;
 
-import org.openhab.core.items.Item;
-import org.openhab.core.library.items.NumberItem;
-import org.openhab.core.library.items.StringItem;
+import org.apache.commons.lang.StringUtils;
 
 
 /**
  * @author Thomas.Eichstaedt-Engelen
  * @since 1.1.0
  */
-public enum KoubachiCommandMapping {
+public enum KoubachiPlantMapping implements KoubachiDataMapping {
 	
-	TEMPERATURE("/smart-device-device/recent-temperature-reading-value", NumberItem.class),
-	BRIGHTNESS("/smart-device-device/recent-light-reading-value", NumberItem.class),
-	MOISTURE("/smart-device-device/recent-soilmoisture-reading-value", NumberItem.class),
-	WATERINSTRUCTIONS("/smart-device-device/plants/plant[id='119542']/vdm-water-instruction", StringItem.class);
+	ID("id", "Number"),
+	NAME("name", "String"),
+	LOCATION("location", "String"),
 	
-	private String xpath;
-	private Class<? extends Item> itemType;
+	WATER_INSTRUCTION("vdm_water_instruction", "String"),
+	WATER_LEVEL("vdm_water_level", "Number"),
+	MIST_INSTRUCTION("vdm_mist_instruction", "String"),
+	MIST_LEVEL("vdm_mist_level", "Number"),
+	FERTILIZER_INSTRUCTION("vdm_fertilizer_instruction", "String"),
+	FERTILIZER_LEVEL("vdm_fertilizer_level", "Number"),
+	LIGHT_INSTRUCTION("vdm_light_instruction", "String"),
+	LIGHT_LEVEL("vdm_light_level", "Number");
 	
-	private KoubachiCommandMapping(String xpath, Class<? extends Item> itemType) {
-		this.xpath = xpath;
+	private String dataKey;
+	private String itemType;
+	
+	private KoubachiPlantMapping(String dataKey, String itemType) {
+		this.dataKey = dataKey;
 		this.itemType = itemType;
 	}
 	
-	public String getXpath() {
-		return xpath;
+	@Override
+	public String getDataKey() {
+		return dataKey;
 	}
 	
-	public Class<? extends Item> getItemType() {
+	@Override
+	public String getItemType() {
 		return itemType;
 	}
-
+	
+	public String getItemPostfix() {
+		String[] parts = getDataKey().split("_");
+		
+		String itemPostfix = "_";
+		for (String part : parts) {
+			itemPostfix += StringUtils.capitalize(part);
+		}
+		
+		return itemPostfix;
+	}
+	
 }

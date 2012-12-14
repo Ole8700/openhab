@@ -20,6 +20,7 @@ Import-Package: org.apache.commons.io,
  org.openhab.core.transform,
  org.openhab.core.types,
  org.openhab.io.net.http,
+ org.openhab.model.item,
  org.openhab.model.item.binding,
  org.osgi.framework,
  org.osgi.service.cm,
@@ -29,5 +30,6 @@ Import-Package: org.apache.commons.io,
 Export-Package: org.openhab.binding.koubachi
 Bundle-DocURL: http://www.openhab.org
 Bundle-RequiredExecutionEnvironment: J2SE-1.5
-Service-Component: OSGI-INF/binding.xml, OSGI-INF/genericbindingprovider.xml
-Bundle-ClassPath: .
+Service-Component: OSGI-INF/binding.xml, OSGI-INF/bindingprovider.xml, OSGI-INF/itemprovider.xml
+Bundle-ClassPath: lib/flexjson-2.1.jar,
+ .
