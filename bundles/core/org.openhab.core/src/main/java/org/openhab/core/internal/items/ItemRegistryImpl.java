@@ -187,9 +187,11 @@ public class ItemRegistryImpl implements ItemRegistry, ItemsChangeListener {
 		if(oldItemNames==null || oldItemNames.isEmpty()) {
 			oldItemNames = new HashSet<String>();
 			Collection<Item> oldItems = itemMap.get(provider);
-			if(oldItems!=null && oldItems.size() > 0) {
-				for(Item oldItem : oldItems) {
-					oldItemNames.add(oldItem.getName());
+			if (oldItems!=null && oldItems.size() > 0) {
+				for (Item oldItem : oldItems) {
+					if (oldItem != null) {
+						oldItemNames.add(oldItem.getName());
+					}
 				}
 			}
 		}
@@ -197,8 +199,8 @@ public class ItemRegistryImpl implements ItemRegistry, ItemsChangeListener {
 		Collection<Item> items = Collections.synchronizedCollection(new ArrayList<Item>());
 		itemMap.put(provider, items);
 
-		for(Item item : provider.getItems()) {
-			if(initializeItem(item)) {
+		for (Item item : provider.getItems()) {
+			if (item != null && initializeItem(item)) {
 				items.add(item);
 			}
 		}
