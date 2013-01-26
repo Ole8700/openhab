@@ -159,7 +159,7 @@ public abstract class AbstractActiveBinding<P extends BindingProvider> extends A
 	 */
 	protected abstract String getName();
 	
-	private class BindingActiveService extends AbstractActiveService {
+	protected class BindingActiveService extends AbstractActiveService {
 
 		@Override
 		public void activate() {

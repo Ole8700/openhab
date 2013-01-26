@@ -61,6 +61,9 @@ public abstract class AbstractBinding<P extends BindingProvider> extends Abstrac
 		this.eventPublisher = null;
 	}
 
+	public void activate() {};
+
+	public void deactivate() {};
 
 	/**
 	 * Adds <code>provider</code> to the list of {@link BindingProvider}s and 
