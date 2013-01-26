@@ -34,6 +34,8 @@ import org.openhab.binding.zwave.ZWaveBindingProvider;
 
 import org.apache.commons.lang.StringUtils;
 import org.openhab.core.binding.AbstractActiveBinding;
+import org.openhab.core.types.Command;
+import org.openhab.core.types.State;
 import org.osgi.service.cm.ConfigurationException;
 import org.osgi.service.cm.ManagedService;
 import org.slf4j.Logger;
@@ -49,8 +51,7 @@ import org.slf4j.LoggerFactory;
  */
 public class ZWaveActiveBinding extends AbstractActiveBinding<ZWaveBindingProvider> implements ManagedService {
 
-	private static final Logger logger = 
-		LoggerFactory.getLogger(ZWaveActiveBinding.class);
+	private static final Logger logger = LoggerFactory.getLogger(ZWaveActiveBinding.class);
 
 	private boolean isProperlyConfigured = false;
 
@@ -95,7 +96,6 @@ public class ZWaveActiveBinding extends AbstractActiveBinding<ZWaveBindingProvid
 		return isProperlyConfigured;
 	}
 	
-	
 	/**
 	 * @{inheritDoc}
 	 */
@@ -103,8 +103,19 @@ public class ZWaveActiveBinding extends AbstractActiveBinding<ZWaveBindingProvid
 	protected void execute() {
 		// the frequently executed code goes here ...
 	}
-		
 	
+	@Override
+	protected void internalReceiveCommand(String itemName, Command command) {
+		// TODO Auto-generated method stub
+		super.internalReceiveCommand(itemName, command);
+	}
+
+	@Override
+	protected void internalReceiveUpdate(String itemName, State newState) {
+		// TODO Auto-generated method stub
+		super.internalReceiveUpdate(itemName, newState);
+	}
+
 	/**
 	 * @{inheritDoc}
 	 */
