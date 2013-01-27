@@ -30,17 +30,18 @@ package org.openhab.binding.zwave.internal;
 
 import java.util.Dictionary;
 
-import org.openhab.binding.zwave.ZWaveBindingProvider;
-
 import org.apache.commons.lang.StringUtils;
+import org.openhab.binding.zwave.ZWaveBindingProvider;
+import org.openhab.binding.zwave.ZWaveCommandClass;
+import org.openhab.binding.zwave.internal.protocol.SerialInterface;
+import org.openhab.binding.zwave.internal.protocol.ZWaveController;
 import org.openhab.core.binding.AbstractActiveBinding;
+import org.openhab.core.library.types.OnOffType;
 import org.openhab.core.types.Command;
-import org.openhab.core.types.State;
 import org.osgi.service.cm.ConfigurationException;
 import org.osgi.service.cm.ManagedService;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
-	
 
 /**
  * Implement this class if you are going create an actively polling service
@@ -57,18 +58,19 @@ public class ZWaveActiveBinding extends AbstractActiveBinding<ZWaveBindingProvid
 
 	/** the refresh interval which is used to poll values from the ZWave server (optional, defaults to 60000ms) */
 	private long refreshInterval = 60000;
-	
+	private String port;
+	private SerialInterface serialInterface;
+	private ZWaveController zController;
 	
 	public ZWaveActiveBinding() {
 	}
-		
-	
+
 	public void activate() {
+		logger.debug("activate()");
 	}
 	
 	public void deactivate() {
-		// deallocate Resources here that are no longer needed and 
-		// should be reset when activating this binding again
+		logger.debug("deactivate()");
 	}
 
 	
@@ -103,17 +105,34 @@ public class ZWaveActiveBinding extends AbstractActiveBinding<ZWaveBindingProvid
 	protected void execute() {
 		// the frequently executed code goes here ...
 	}
-	
-	@Override
-	protected void internalReceiveCommand(String itemName, Command command) {
-		// TODO Auto-generated method stub
-		super.internalReceiveCommand(itemName, command);
-	}
 
 	@Override
-	protected void internalReceiveUpdate(String itemName, State newState) {
-		// TODO Auto-generated method stub
-		super.internalReceiveUpdate(itemName, newState);
+	protected void internalReceiveCommand(String itemName, Command command) {
+		// if we are not yet initialized, don't waste time and return
+		if(!isProperlyConfigured) return;
+		
+		logger.debug("internalReceiveCommand({}, {})", itemName, command.toString());
+		for (ZWaveBindingProvider provider : providers) {
+			logger.debug("BindingProvider = {}", provider.toString());
+			logger.debug("Got nodeId = {}, commandClass = {}", provider.getZwaveData(itemName).getNodeId(),
+					provider.getZwaveData(itemName).getCommandClass());
+			int nodeId = Integer.valueOf(provider.getZwaveData(itemName).getNodeId());
+			ZWaveCommandClass commandClass = provider.getZwaveData(itemName).getCommandClass();
+			if (this.zController.isConnected()) {
+				logger.debug("ZWaveController is connected");
+				if (command == OnOffType.ON) {
+					logger.debug("Sending ON");
+					this.zController.sendLevel(nodeId, 255);
+				} else if (command == OnOffType.OFF) {
+					logger.debug("Sending OFF");
+					this.zController.sendLevel(nodeId, 0);					
+				} else {
+					logger.warn("Unknown command >{}<", command.toString());
+				}
+			} else {
+				logger.warn("ZWaveController is not connected");
+			}
+		}
 	}
 
 	/**
@@ -126,12 +145,23 @@ public class ZWaveActiveBinding extends AbstractActiveBinding<ZWaveBindingProvid
 			if (StringUtils.isNotBlank(refreshIntervalString)) {
 				refreshInterval = Long.parseLong(refreshIntervalString);
 			}
-			
-			// read further config parameters here ...
-
+			if (StringUtils.isNotBlank((String) config.get("port"))) {
+				port = (String) config.get("port");
+				logger.info("Update config, port = {}", port);
+				this.serialInterface = new SerialInterface(port);
+				this.zController = new ZWaveController(serialInterface);
+				zController.initialize();
+			}
 			isProperlyConfigured = true;
 		}
 	}
-	
+
+	public String getPort() {
+		return port;
+	}
+
+	public void setPort(String port) {
+		this.port = port;
+	}
 
 }

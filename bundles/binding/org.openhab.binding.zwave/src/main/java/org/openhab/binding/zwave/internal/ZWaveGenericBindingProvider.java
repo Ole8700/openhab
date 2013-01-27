@@ -28,13 +28,16 @@
  */
 package org.openhab.binding.zwave.internal;
 
+
+import org.apache.commons.lang.StringUtils;
+import org.openhab.binding.zwave.ZWaveBindingConfig;
 import org.openhab.binding.zwave.ZWaveBindingProvider;
-import org.openhab.core.binding.BindingConfig;
+import org.openhab.binding.zwave.ZWaveCommandClass;
 import org.openhab.core.items.Item;
-import org.openhab.core.library.items.DimmerItem;
-import org.openhab.core.library.items.SwitchItem;
 import org.openhab.model.item.binding.AbstractGenericBindingProvider;
 import org.openhab.model.item.binding.BindingConfigParseException;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 
 
 /**
@@ -44,6 +47,8 @@ import org.openhab.model.item.binding.BindingConfigParseException;
  * @since 1.2.0
  */
 public class ZWaveGenericBindingProvider extends AbstractGenericBindingProvider implements ZWaveBindingProvider {
+
+	private static final Logger logger = LoggerFactory.getLogger(ZWaveGenericBindingProvider.class);
 
 	/**
 	 * {@inheritDoc}
@@ -57,30 +62,38 @@ public class ZWaveGenericBindingProvider extends AbstractGenericBindingProvider 
 	 */
 	@Override
 	public void validateItemType(Item item, String bindingConfig) throws BindingConfigParseException {
-		//if (!(item instanceof SwitchItem || item instanceof DimmerItem)) {
-		//	throw new BindingConfigParseException("item '" + item.getName()
-		//			+ "' is of type '" + item.getClass().getSimpleName()
-		//			+ "', only Switch- and DimmerItems are allowed - please check your *.items configuration");
-		//}
+		// All types are valid
+		logger.info("validateItemType({}, {})", item.getName(), bindingConfig);
 	}
-	
+
 	/**
 	 * {@inheritDoc}
 	 */
 	@Override
 	public void processBindingConfiguration(String context, Item item, String bindingConfig) throws BindingConfigParseException {
+		logger.debug("processBindingConfiguration({}, {})", item.getName(), bindingConfig);
 		super.processBindingConfiguration(context, item, bindingConfig);
-		ZWaveBindingConfig config = new ZWaveBindingConfig();
+		String[] segments = bindingConfig.split(":");
+
+		String nodeId = segments[0];
+		if (StringUtils.isBlank(nodeId)) {
+			throw new BindingConfigParseException("node id must not be blank");
+		}
+
+		ZWaveCommandClass commandClass = ZWaveCommandClass.SWITCH; // default setting
+		if(segments.length > 1) {
+			try {
+				commandClass = ZWaveCommandClass.valueOf(segments[1].toUpperCase());
+			} catch(Exception e) {
+				throw new BindingConfigParseException(segments[1] + " is an unknown Z-Wave command class");
+			}
+		}
 		
-		//parse bindingconfig here ...
-		
-		addBindingConfig(item, config);		
+		ZWaveBindingConfig config = new ZWaveBindingConfig(nodeId, commandClass);
+		addBindingConfig(item, config);
 	}
-	
-	
-	class ZWaveBindingConfig implements BindingConfig {
-		// put member fields here which holds the parsed values
+
+	public ZWaveBindingConfig getZwaveData(String itemName) {
+		return (ZWaveBindingConfig) this.bindingConfigs.get(itemName);
 	}
-	
-	
 }
