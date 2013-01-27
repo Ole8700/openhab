@@ -35,5 +35,5 @@ import org.openhab.core.binding.BindingProvider;
  * @since 1.2.0
  */
 public interface ZWaveBindingProvider extends BindingProvider {
-
+	public ZWaveBindingConfig getZwaveData(String itemName);
 }
