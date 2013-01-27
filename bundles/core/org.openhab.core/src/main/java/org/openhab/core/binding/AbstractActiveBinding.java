@@ -28,11 +28,6 @@
  */
 package org.openhab.core.binding;
 
-import java.util.Collection;
-import java.util.Collections;
-import java.util.HashSet;
-
-import org.openhab.core.events.EventPublisher;
 import org.openhab.core.service.AbstractActiveService;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -51,21 +46,8 @@ public abstract class AbstractActiveBinding<P extends BindingProvider> extends A
 
 	private static final Logger logger = LoggerFactory.getLogger(AbstractActiveBinding.class);
 
-	/** to keep track of all binding providers */
-	protected Collection<P> providers = Collections.synchronizedSet(new HashSet<P>());
-	
+	/** embedded active service to allow the binding to have some code executed in a given interval. */
 	protected AbstractActiveService activeService = new BindingActiveService();
-	
-	protected EventPublisher eventPublisher = null;
-	
-	public void setEventPublisher(EventPublisher eventPublisher) {
-		this.eventPublisher = eventPublisher;
-	}
-
-	public void unsetEventPublisher(EventPublisher eventPublisher) {
-		this.eventPublisher = null;
-	}
-	
 		
 	/**
 	 * Adds <code>provider</code> to the list of {@link BindingProvider}s and 
@@ -76,7 +58,7 @@ public abstract class AbstractActiveBinding<P extends BindingProvider> extends A
 	 * @param provider the new {@link BindingProvider} to add
 	 */
 	public void addBindingProvider(P provider) {
-		this.providers.add(provider);
+		super.addBindingProvider(provider);
 		provider.addBindingChangeListener(this);
 		activeService.activate();
 	}
@@ -88,7 +70,7 @@ public abstract class AbstractActiveBinding<P extends BindingProvider> extends A
 	 * @param provider the {@link BindingProvider} to remove
 	 */
 	public void removeBindingProvider(P provider) {
-		this.providers.remove(provider);
+		super.removeBindingProvider(provider);
 		
 		// if there are no binding providers there is no need to run this 
 		// refresh thread any longer ...
@@ -159,11 +141,8 @@ public abstract class AbstractActiveBinding<P extends BindingProvider> extends A
 	 */
 	protected abstract String getName();
 	
-	protected class BindingActiveService extends AbstractActiveService {
-
-		@Override
-		public void activate() {
-		}
+	/** private inner class, which delegates method calls to the outer binding instance */
+	private class BindingActiveService extends AbstractActiveService {
 
 		/**
 		 * {@inheritDoc}
