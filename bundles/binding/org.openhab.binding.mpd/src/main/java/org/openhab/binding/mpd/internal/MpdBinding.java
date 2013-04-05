@@ -58,8 +58,7 @@ import org.bff.javampd.exception.MPDResponseException;
 import org.bff.javampd.monitor.MPDStandAloneMonitor;
 import org.openhab.binding.mpd.MpdBindingProvider;
 import org.openhab.binding.mpd.internal.MultiClickDetector.MultiClickListener;
-import org.openhab.core.events.AbstractEventSubscriberBinding;
-import org.openhab.core.events.EventPublisher;
+import org.openhab.core.binding.AbstractBinding;
 import org.openhab.core.library.types.OnOffType;
 import org.openhab.core.library.types.PercentType;
 import org.openhab.core.types.Command;
@@ -86,13 +85,11 @@ import org.slf4j.LoggerFactory;
  * @author Thomas.Eichstaedt-Engelen
  * @since 0.8.0
  */
-public class MpdBinding extends AbstractEventSubscriberBinding<MpdBindingProvider> implements ManagedService, VolumeChangeListener, PlayerBasicChangeListener, MultiClickListener<Command> {
+public class MpdBinding extends AbstractBinding<MpdBindingProvider> implements ManagedService, VolumeChangeListener, PlayerBasicChangeListener, MultiClickListener<Command> {
 
 	private static final String MPD_SCHEDULER_GROUP = "MPD";
 
 	private static final Logger logger = LoggerFactory.getLogger(MpdBinding.class);
-	
-	protected EventPublisher eventPublisher = null;
 		
 	private Map<String, MpdPlayerConfig> playerConfigCache = new HashMap<String, MpdPlayerConfig>();
 	
@@ -111,15 +108,6 @@ public class MpdBinding extends AbstractEventSubscriberBinding<MpdBindingProvide
 	public MpdBinding() {
 		playerConfigCache = new HashMap<String, MpdBinding.MpdPlayerConfig>();
 		clickDetector = new MultiClickDetector<Command>(this, 300);
-	}
-	
-	
-	public void setEventPublisher(EventPublisher eventPublisher) {
-		this.eventPublisher = eventPublisher;
-	}
-
-	public void unsetEventPublisher(EventPublisher eventPublisher) {
-		this.eventPublisher = null;
 	}
 	
 	

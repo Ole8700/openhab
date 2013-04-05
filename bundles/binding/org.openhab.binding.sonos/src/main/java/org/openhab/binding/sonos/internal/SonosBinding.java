@@ -42,10 +42,8 @@ import org.apache.commons.lang.IllegalClassException;
 import org.apache.commons.lang.StringUtils;
 import org.openhab.binding.sonos.SonosBindingProvider;
 import org.openhab.binding.sonos.SonosCommandType;
+import org.openhab.core.binding.AbstractBinding;
 import org.openhab.core.binding.BindingProvider;
-import org.openhab.core.events.AbstractEventSubscriberBinding;
-import org.openhab.core.events.EventPublisher;
-import org.openhab.core.items.ItemRegistry;
 import org.openhab.core.library.types.DecimalType;
 import org.openhab.core.library.types.OnOffType;
 import org.openhab.core.library.types.StringType;
@@ -90,7 +88,7 @@ import org.xml.sax.SAXException;
  * @since 1.1.0
  * 
  */
-public class SonosBinding extends AbstractEventSubscriberBinding<SonosBindingProvider> implements ManagedService {
+public class SonosBinding extends AbstractBinding<SonosBindingProvider> implements ManagedService {
 	
 	private static Logger logger = LoggerFactory.getLogger(SonosBinding.class);
 	
@@ -100,8 +98,6 @@ public class SonosBinding extends AbstractEventSubscriberBinding<SonosBindingPro
 	
 	private List<SonosZoneGroup> sonosZoneGroups = null;
 
-	static protected EventPublisher eventPublisher;
-	static protected ItemRegistry itemRegistry;
 	static protected UpnpService upnpService;
 	static protected SonosBinding self;
 	
@@ -898,22 +894,6 @@ public class SonosBinding extends AbstractEventSubscriberBinding<SonosBindingPro
 		// start the thread that will poll some devices
     	pollingThread.setDaemon(true);
     	pollingThread.start();
-	}
-	
-	public void setEventPublisher(EventPublisher eventPublisher) {
-		SonosBinding.eventPublisher = eventPublisher;
-	}
-
-	public void setItemRegistry(ItemRegistry itemRegistry) {
-		SonosBinding.itemRegistry = itemRegistry;
-	}
-
-	public void unsetEventPublisher(EventPublisher eventPublisher) {
-		SonosBinding.eventPublisher = null;
-	}
-
-	public void unsetItemRegistry(ItemRegistry itemRegistry) {
-		SonosBinding.itemRegistry = null;
 	}
 	
 	protected String getSonosIDforDevice(RemoteDevice device){

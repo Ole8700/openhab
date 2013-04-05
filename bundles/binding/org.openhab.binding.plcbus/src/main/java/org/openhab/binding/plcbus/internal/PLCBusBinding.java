@@ -36,16 +36,18 @@ import org.openhab.binding.plcbus.internal.protocol.ISerialPortGateway;
 import org.openhab.binding.plcbus.internal.protocol.PLCBusController;
 import org.openhab.binding.plcbus.internal.protocol.SerialPortGateway;
 import org.openhab.binding.plcbus.internal.protocol.StatusResponse;
+import org.openhab.core.binding.AbstractBinding;
 import org.openhab.core.binding.BindingProvider;
-import org.openhab.core.events.AbstractEventSubscriberBinding;
-import org.openhab.core.events.EventPublisher;
-import org.openhab.core.library.types.*;
+import org.openhab.core.library.types.IncreaseDecreaseType;
+import org.openhab.core.library.types.OnOffType;
+import org.openhab.core.library.types.StopMoveType;
+import org.openhab.core.library.types.UpDownType;
 import org.openhab.core.types.Command;
 import org.openhab.core.types.State;
 import org.openhab.core.types.UnDefType;
-import org.osgi.service.component.ComponentContext;
 import org.osgi.service.cm.ConfigurationException;
 import org.osgi.service.cm.ManagedService;
+import org.osgi.service.component.ComponentContext;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
@@ -55,13 +57,11 @@ import org.slf4j.LoggerFactory;
  * @author Robin Lenz
  * @since 1.1.0
  */
-public class PLCBusBinding extends
-		AbstractEventSubscriberBinding<PLCBusBindingProvider> implements
+public class PLCBusBinding extends AbstractBinding<PLCBusBindingProvider> implements
 		ManagedService {
 
 	private static Logger logger = LoggerFactory.getLogger(PLCBusBinding.class);
 
-	private EventPublisher eventPublisher;
 	private ISerialPortGateway serialPortGateway;
 	
 
@@ -86,16 +86,7 @@ public class PLCBusBinding extends
 	public void bindingChanged(BindingProvider provider, String itemName) {
 		super.bindingChanged(provider, itemName);
 	}
-
 	
-	public void setEventPublisher(EventPublisher eventPublisher) {
-		this.eventPublisher = eventPublisher;
-	}
-
-	public void unsetEventPublisher(EventPublisher eventPublisher) {
-		this.eventPublisher = null;
-	}
-
 	/**
 	 * {@inheritDoc}
 	 */

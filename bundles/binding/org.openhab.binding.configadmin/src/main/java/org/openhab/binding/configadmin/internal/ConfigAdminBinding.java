@@ -34,8 +34,7 @@ import java.util.Dictionary;
 import org.apache.commons.lang.StringUtils;
 import org.openhab.binding.configadmin.ConfigAdminBindingProvider;
 import org.openhab.binding.configadmin.internal.ConfigAdminGenericBindingProvider.ConfigAdminBindingConfig;
-import org.openhab.core.events.AbstractEventSubscriberBinding;
-import org.openhab.core.events.EventPublisher;
+import org.openhab.core.binding.AbstractBinding;
 import org.openhab.core.items.Item;
 import org.openhab.core.library.types.StringType;
 import org.openhab.core.types.Command;
@@ -60,13 +59,11 @@ import org.slf4j.LoggerFactory;
  * @author Thomas.Eichstaedt-Engelen
  * @since 1.0.0
  */
-public class ConfigAdminBinding extends AbstractEventSubscriberBinding<ConfigAdminBindingProvider> implements ConfigurationListener {
+public class ConfigAdminBinding extends AbstractBinding<ConfigAdminBindingProvider> implements ConfigurationListener {
 
 	private static final Logger logger = LoggerFactory.getLogger(ConfigAdminBinding.class);
 	
 	private ConfigurationAdmin configAdmin;
-	
-	private EventPublisher eventPublisher = null;
 	
 	private EventBusInitializer initializer = null;
 	
@@ -79,14 +76,6 @@ public class ConfigAdminBinding extends AbstractEventSubscriberBinding<ConfigAdm
 		this.configAdmin = null;
 	}
 	
-	public void setEventPublisher(EventPublisher eventPublisher) {
-		this.eventPublisher = eventPublisher;
-	}
-
-	public void unsetEventPublisher(EventPublisher eventPublisher) {
-		this.eventPublisher = null;
-	}
-
 	public void activate() {
 		initializer = new EventBusInitializer();
 		initializer.start();

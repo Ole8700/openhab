@@ -35,10 +35,11 @@ import net.wimpi.modbus.util.BitVector;
 
 import org.openhab.binding.modbus.ModbusBindingProvider;
 import org.openhab.binding.modbus.internal.ModbusGenericBindingProvider.ModbusBindingConfig;
+import org.openhab.core.binding.AbstractBinding;
 import org.openhab.core.binding.BindingProvider;
-import org.openhab.core.events.AbstractEventSubscriberBinding;
-import org.openhab.core.events.EventPublisher;
+import org.openhab.core.library.items.SwitchItem;
 import org.openhab.core.library.types.DecimalType;
+import org.openhab.core.library.types.OnOffType;
 import org.openhab.core.types.Command;
 import org.openhab.core.types.State;
 
@@ -50,24 +51,12 @@ import org.openhab.core.types.State;
  * @author Dmitry Krasnov
  * @since 1.1.0
  */
-public class ModbusBinding extends AbstractEventSubscriberBinding<ModbusBindingProvider> {
-	
-	private static EventPublisher eventPublisher = null;
-
+public class ModbusBinding extends AbstractBinding<ModbusBindingProvider> {
 	
 	public void activate() {
 	}
 
 	public void deactivate() {
-	}
-
-
-	public void setEventPublisher(EventPublisher eventPublisher) {
-		ModbusBinding.eventPublisher = eventPublisher;
-	}
-
-	public void unsetEventPublisher(EventPublisher eventPublisher) {
-		ModbusBinding.eventPublisher = null;
 	}
 
 	/**
@@ -82,7 +71,6 @@ public class ModbusBinding extends AbstractEventSubscriberBinding<ModbusBindingP
 				slave.executeCommand(command, config.readRegister, config.writeRegister);
 			}
 		}
-
 	}
 
 	/**
@@ -98,9 +86,17 @@ public class ModbusBinding extends AbstractEventSubscriberBinding<ModbusBindingP
 				ModbusBindingConfig config = provider.getConfig(itemName);
 				if (config.slaveName.equals(slaveName)) {
 					InputRegister value = registers[config.readRegister];
+					if (config.getItem() instanceof SwitchItem) {
+						if (value.getValue() == 0 && (provider.getConfig(itemName).getItemState() != OnOffType.OFF)) {
+							eventPublisher.postUpdate(itemName, OnOffType.OFF);
+						} else if (value.getValue() != 0 && (provider.getConfig(itemName).getItemState() != OnOffType.ON)) {
+							eventPublisher.postUpdate(itemName, OnOffType.ON);							
+						}
+					} else {
 					DecimalType newState = new DecimalType(value.getValue());
 					if (!newState.equals(provider.getConfig(itemName).getItemState()))
 						eventPublisher.postUpdate(itemName, newState);
+					}
 				}
 			}
 		}
@@ -130,6 +126,10 @@ public class ModbusBinding extends AbstractEventSubscriberBinding<ModbusBindingP
 	}
 	
 
+	/**
+	 * Returns names of all the items, registered with this binding
+	 * @return list of item names
+	 */
 	public Collection<String> getItemNames() {
 		Collection<String> items = null;
 		for (BindingProvider provider : providers) {
@@ -140,7 +140,4 @@ public class ModbusBinding extends AbstractEventSubscriberBinding<ModbusBindingP
 		}
 		return items;
 	}
-
-
 }
-

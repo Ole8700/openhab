@@ -42,9 +42,8 @@ import org.openhab.binding.knx.config.KNXBindingProvider;
 import org.openhab.binding.knx.config.KNXTypeMapper;
 import org.openhab.binding.knx.internal.connection.KNXConnection;
 import org.openhab.core.autoupdate.AutoUpdateBindingProvider;
+import org.openhab.core.binding.AbstractBinding;
 import org.openhab.core.binding.BindingProvider;
-import org.openhab.core.events.AbstractEventSubscriberBinding;
-import org.openhab.core.events.EventPublisher;
 import org.openhab.core.types.Command;
 import org.openhab.core.types.State;
 import org.openhab.core.types.Type;
@@ -73,14 +72,12 @@ import tuwien.auto.calimero.process.ProcessListener;
  * @since 0.3.0
  *
  */
-public class KNXBinding extends AbstractEventSubscriberBinding<KNXBindingProvider> implements ProcessListener {
+public class KNXBinding extends AbstractBinding<KNXBindingProvider> implements ProcessListener {
 
 	private static final Logger logger = LoggerFactory.getLogger(KNXBinding.class);
 
 	/** to keep track of all KNX type mappers */
 	protected Collection<KNXTypeMapper> typeMappers = new HashSet<KNXTypeMapper>();
-
-	private EventPublisher eventPublisher;
 	
 	/**
 	 * used to store events that we have sent ourselves; we need to remember them for not reacting to them
@@ -107,15 +104,7 @@ public class KNXBinding extends AbstractEventSubscriberBinding<KNXBindingProvide
 		}
 		providers.clear();
 		initializer.setInterrupted(true);
-	}
-	
-
-	public void setEventPublisher(EventPublisher eventPublisher) {
-		this.eventPublisher = eventPublisher;
-	}
-
-	public void unsetEventPublisher(EventPublisher eventPublisher) {
-		this.eventPublisher = null;
+		KNXConnection.disconnect();
 	}
 	
 	
@@ -432,7 +421,7 @@ public class KNXBinding extends AbstractEventSubscriberBinding<KNXBindingProvide
 		@Override
 		public void run() {
 			// as long as no interrupt is requested, continue running
-			while (!interrupted) {
+			while (!interrupted && !KNXConnection.shutdown) {
 				if (datapointsToInitialize.size() > 0) {
 					// we first clone the map, so that it stays unmodified
 					HashMap<Datapoint,Integer> clonedMap =
@@ -482,6 +471,9 @@ public class KNXBinding extends AbstractEventSubscriberBinding<KNXBindingProvide
 					} catch (InterruptedException e) {
 						logger.debug("KNX reading pause has been interrupted: {}", e.getMessage());
 					}
+				}
+				if(KNXConnection.shutdown) {
+					return;
 				}
 			}
 		}

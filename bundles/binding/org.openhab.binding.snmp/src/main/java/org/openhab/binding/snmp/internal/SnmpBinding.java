@@ -29,19 +29,17 @@
 package org.openhab.binding.snmp.internal;
 
 import java.io.IOException;
-import java.util.Collection;
 import java.util.Dictionary;
-import java.util.HashSet;
 
 import org.apache.commons.lang.StringUtils;
 import org.openhab.binding.snmp.SnmpBindingProvider;
-import org.openhab.core.events.EventPublisher;
+import org.openhab.core.binding.AbstractBinding;
 import org.openhab.core.items.Item;
-import org.openhab.core.items.ItemNotFoundException;
-import org.openhab.core.items.ItemRegistry;
+import org.openhab.core.library.items.NumberItem;
+import org.openhab.core.library.items.StringItem;
+import org.openhab.core.library.types.DecimalType;
 import org.openhab.core.library.types.StringType;
 import org.openhab.core.types.State;
-import org.openhab.core.types.TypeParser;
 import org.osgi.service.cm.ConfigurationException;
 import org.osgi.service.cm.ManagedService;
 import org.slf4j.Logger;
@@ -72,16 +70,9 @@ import org.snmp4j.transport.DefaultUdpTransportMapping;
  * @author Thomas.Eichstaedt-Engelen
  * @since 0.9.0
  */
-public class SnmpBinding implements ManagedService, CommandResponder {
+public class SnmpBinding extends AbstractBinding<SnmpBindingProvider> implements ManagedService, CommandResponder {
 
 	private static final Logger logger = LoggerFactory.getLogger(SnmpBinding.class);
-	
-	/** to keep track of all binding providers */
-	final static protected Collection<SnmpBindingProvider> providers = new HashSet<SnmpBindingProvider>();
-	
-	protected static ItemRegistry itemRegistry;
-	
-	protected static EventPublisher eventPublisher;
 
 	protected static AbstractTransportMapping<UdpAddress> transport;
 	
@@ -96,32 +87,6 @@ public class SnmpBinding implements ManagedService, CommandResponder {
 	
 	public void deactivate() {
 		stopListening();
-	}
-	
-	
-	public void setEventPublisher(EventPublisher eventPublisher) {
-		SnmpBinding.eventPublisher = eventPublisher;
-	}
-
-	public void unsetEventPublisher(EventPublisher eventPublisher) {
-		SnmpBinding.eventPublisher = null;
-	}
-	
-	public void addBindingProvider(SnmpBindingProvider provider) {
-		SnmpBinding.providers.add(provider);
-	}
-
-	public void removeBindingProvider(SnmpBindingProvider provider) {
-		SnmpBinding.providers.remove(provider);		
-	}
-	
-	
-	public void setItemRegistry(ItemRegistry itemRegistry) {
-		SnmpBinding.itemRegistry = itemRegistry;
-	}
-	
-	public void unsetItemRegistry(ItemRegistry itemRegistry) {
-		SnmpBinding.itemRegistry = null;
 	}
 	
 	
@@ -185,16 +150,19 @@ public class SnmpBinding implements ManagedService, CommandResponder {
 					OID oid = provider.getOID(itemName);				
 					Variable variable = pdu.getVariable(oid);
 					if (variable != null) {
-						try {
-							Item item = itemRegistry.getItem(itemName);
-							State state = TypeParser.parseState(item.getAcceptedDataTypes(), variable.toString());
-							if (state != null) {
-								eventPublisher.postUpdate(itemName, state);
-							} else {
-								logger.debug("'{}' couldn't be parsed to a State. Valid State-Types are {}", variable.toString(), item.getAcceptedDataTypes());
-							}
-						} catch (ItemNotFoundException e) {
-							logger.warn("Item '" + itemName + "' does not exist.");
+						Class<? extends Item> itemType = provider.getItemType(itemName);
+						
+						State state = null;
+						if (itemType.isAssignableFrom(StringItem.class)) {
+							state = StringType.valueOf(variable.toString());
+						} else if (itemType.isAssignableFrom(NumberItem.class)) {
+							state = DecimalType.valueOf(variable.toString());
+						}
+
+						if (state != null) {
+							eventPublisher.postUpdate(itemName, state);
+						} else {
+							logger.debug("'{}' couldn't be parsed to a State. Valid State-Types are String and Number", variable.toString());
 						}
 					} else {
 						logger.trace("PDU doesn't contain a variable with OID ‘{}‘", oid.toString());

@@ -57,7 +57,7 @@
   <description>This is the open Home Automation Bus (openHAB)</description>
 
   <properties>
-    <tycho-version>0.16.0</tycho-version>    
+    <tycho-version>0.17.0</tycho-version>    
     <tycho-groupid>org.eclipse.tycho</tycho-groupid>
     <project.build.sourceEncoding>UTF-8</project.build.sourceEncoding>
   </properties>
@@ -241,10 +241,23 @@
 	  <pluginRepository>
 	    <id>fornax.repository</id>
 	    <name>Fornax Repository</name>
-	    <url>http://www.fornax-platform.org/m2/repository</url>
+	    <url>http://www.fornax-platform.org/nexus/content/groups/public/</url>
 	    <snapshots>
 	    	<enabled>true</enabled>
 	    </snapshots>
+	  </pluginRepository>
+	  <pluginRepository>
+	    <id>openhab.repository.snapshot</id>
+	    <name>openHAB Cloudbees Repository</name>
+	    <url>http://repository-openhab.forge.cloudbees.com/snapshot/</url>
+	    <snapshots>
+	    	<enabled>true</enabled>
+	    </snapshots>
+	  </pluginRepository>
+	  <pluginRepository>
+	    <id>openhab.repository</id>
+	    <name>openHAB Cloudbees Repository</name>
+	    <url>http://repository-openhab.forge.cloudbees.com/release/</url>
 	  </pluginRepository>
   </pluginRepositories>
 
