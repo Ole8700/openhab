@@ -29,10 +29,8 @@
 package org.openhab.binding.asterisk.internal;
 
 import java.io.IOException;
-import java.util.Collection;
 import java.util.Dictionary;
 import java.util.HashMap;
-import java.util.HashSet;
 import java.util.Map;
 
 import org.apache.commons.lang.StringUtils;
@@ -45,10 +43,8 @@ import org.asteriskjava.manager.event.HangupEvent;
 import org.asteriskjava.manager.event.ManagerEvent;
 import org.asteriskjava.manager.event.NewChannelEvent;
 import org.openhab.binding.asterisk.AsteriskBindingProvider;
-import org.openhab.core.events.EventPublisher;
+import org.openhab.core.binding.AbstractBinding;
 import org.openhab.core.items.Item;
-import org.openhab.core.items.ItemNotFoundException;
-import org.openhab.core.items.ItemRegistry;
 import org.openhab.core.library.items.SwitchItem;
 import org.openhab.core.library.types.OnOffType;
 import org.openhab.core.library.types.StringType;
@@ -67,16 +63,9 @@ import org.slf4j.LoggerFactory;
  * @author Thomas.Eichstaedt-Engelen
  * @since 0.9.0
  */
-public class AsteriskBinding implements ManagedService {
+public class AsteriskBinding extends AbstractBinding<AsteriskBindingProvider> implements ManagedService {
 
 	private static final Logger logger = LoggerFactory.getLogger(AsteriskBinding.class);
-	
-	/** to keep track of all binding providers */
-	final static protected Collection<AsteriskBindingProvider> providers = new HashSet<AsteriskBindingProvider>();
-	
-	protected static ItemRegistry itemRegistry;
-	
-	protected static EventPublisher eventPublisher;
 
 	protected static ManagerConnection managerConnection;
 	
@@ -96,31 +85,6 @@ public class AsteriskBinding implements ManagedService {
 	}
 	
 	
-	public void setItemRegistry(ItemRegistry itemRegistry) {
-		AsteriskBinding.itemRegistry = itemRegistry;
-	}
-	
-	public void unsetItemRegistry(ItemRegistry itemRegistry) {
-		AsteriskBinding.itemRegistry = null;
-	}
-	
-	public void setEventPublisher(EventPublisher eventPublisher) {
-		AsteriskBinding.eventPublisher = eventPublisher;
-	}
-
-	public void unsetEventPublisher(EventPublisher eventPublisher) {
-		AsteriskBinding.eventPublisher = null;
-	}
-
-	public void addBindingProvider(AsteriskBindingProvider provider) {
-		AsteriskBinding.providers.add(provider);
-	}
-
-	public void removeBindingProvider(AsteriskBindingProvider provider) {
-		AsteriskBinding.providers.remove(provider);		
-	}
-	
-
 	/**
 	 * {@inheritDoc}
 	 */
@@ -191,10 +155,10 @@ public class AsteriskBinding implements ManagedService {
 	/**
 	 * @author Thomas.Eichstaedt-Engelen
 	 */
-	private static class AsteriskEventManager implements ManagerEventListener {
+	private class AsteriskEventManager implements ManagerEventListener {
 
 		/** holds call details of the currently active calls */
-		protected static Map<String, CallType> eventCache;
+		protected Map<String, CallType> eventCache;
 		
 		public AsteriskEventManager() {
 			eventCache = new HashMap<String, CallType>();
@@ -204,17 +168,11 @@ public class AsteriskBinding implements ManagedService {
 		 * @{inheritDoc}
 		 */
 		public void onManagerEvent(ManagerEvent managerEvent) {
-			if (itemRegistry != null) {
-				for (AsteriskBindingProvider provider : providers) {
-					for (AsteriskBindingTypes type : AsteriskBindingTypes.values()) {
-						for (String itemName : provider.getItemNamesForType(type)) {
-							try {
-								Item item = itemRegistry.getItem(itemName);
-								handleManagerEvent(item, managerEvent);								
-							}
-							catch (ItemNotFoundException e) {
-							}
-						}
+			for (AsteriskBindingProvider provider : providers) {
+				for (AsteriskBindingTypes type : AsteriskBindingTypes.values()) {
+					for (String itemName : provider.getItemNamesByType(type)) {
+						Class<? extends Item> itemType = provider.getItemType(itemName);
+						handleManagerEvent(itemName, itemType, managerEvent);								
 					}
 				}
 			}
@@ -224,19 +182,20 @@ public class AsteriskBinding implements ManagedService {
 		 * Dispatches the given <code>managerEvent</code> to the specialized
 		 * handler methods.
 		 * 
-		 * @param item the corresponding item
+		 * @param itemName the corresponding item
+		 * @param itemType the Type of the corresponding item
 		 * @param managerEvent the {@link ManagerEvent} to dispatch
 		 */
-		private void handleManagerEvent(Item item, ManagerEvent managerEvent) {
+		private void handleManagerEvent(String itemName, Class<? extends Item> itemType, ManagerEvent managerEvent) {
 			if (managerEvent instanceof NewChannelEvent) {
-				handleNewCall(item, (NewChannelEvent) managerEvent);
+				handleNewCall(itemName, itemType, (NewChannelEvent) managerEvent);
 			}
 			else if (managerEvent instanceof HangupEvent) {
-				handleHangupCall(item, (HangupEvent) managerEvent);
+				handleHangupCall(itemName, itemType, (HangupEvent) managerEvent);
 			}
 		}
 
-		private void handleNewCall(Item item, NewChannelEvent event) {
+		private void handleNewCall(String itemName, Class<? extends Item> itemType, NewChannelEvent event) {
 			if (event.getCallerIdNum() == null || event.getExten() == null) {
 				logger.debug("calleridnum or exten is null -> handle new call aborted!");
 				return;
@@ -247,14 +206,14 @@ public class AsteriskBinding implements ManagedService {
 					new StringType(event.getExten()));
 			eventCache.put(event.getUniqueId(), call);
 			
-			if (item instanceof SwitchItem) {
-				eventPublisher.postUpdate(item.getName(), OnOffType.ON);
+			if (itemType.isAssignableFrom(SwitchItem.class)) {
+				eventPublisher.postUpdate(itemName, OnOffType.ON);
 			}
-			else if (item instanceof CallItem) {
-				eventPublisher.postUpdate(item.getName(), call);
+			else if (itemType.isAssignableFrom(CallItem.class)) {
+				eventPublisher.postUpdate(itemName, call);
 			}
 			else {
-				logger.warn("handle call for item type '{}' is undefined", item);
+				logger.warn("handle call for item type '{}' is undefined", itemName);
 			}
 		}
 		
@@ -265,23 +224,24 @@ public class AsteriskBinding implements ManagedService {
 		 * {@link CallType} and ON-State (one of the remaining active calls)
 		 * in all other cases. 
 		 * 
-		 * @param item
+		 * @param itemName
+		 * @param itemType 
 		 * @param event
 		 */
-		private void handleHangupCall(Item item, HangupEvent event) {
+		private void handleHangupCall(String itemName, Class<? extends Item> itemType, HangupEvent event) {
 			eventCache.remove(event.getUniqueId());
-			if (item instanceof SwitchItem) {
+			if (itemType.isAssignableFrom(SwitchItem.class)) {
 				OnOffType activeState = 
 					(eventCache.size() == 0 ? OnOffType.OFF : OnOffType.ON); 
-				eventPublisher.postUpdate(item.getName(), activeState);
+				eventPublisher.postUpdate(itemName, activeState);
 			}
-			else if (item instanceof CallItem) {
+			else if (itemType.isAssignableFrom(CallItem.class)) {
 				CallType call = (CallType)
 					(eventCache.size() == 0 ? CallType.EMPTY : eventCache.values().toArray()[0]);
-				eventPublisher.postUpdate(item.getName(), call);
+				eventPublisher.postUpdate(itemName, call);
 			}
 			else {
-				logger.warn("handleHangupCall - postUpdate for itemType '{}' is undefined", item);
+				logger.warn("handleHangupCall - postUpdate for itemType '{}' is undefined", itemName);
 			}
 		}
 		

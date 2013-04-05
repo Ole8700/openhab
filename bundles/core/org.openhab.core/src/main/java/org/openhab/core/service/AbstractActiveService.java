@@ -28,9 +28,6 @@
  */
 package org.openhab.core.service;
 
-import java.util.ArrayList;
-import java.util.Collection;
-
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
@@ -42,7 +39,7 @@ import org.slf4j.LoggerFactory;
  * @author Kai Kreuzer
  * @since 0.7.0
  */
-public abstract class AbstractActiveService implements ActiveServiceStatusProvider {
+public abstract class AbstractActiveService {
 
 	private static final Logger logger = LoggerFactory.getLogger(AbstractActiveService.class);
 
@@ -58,30 +55,14 @@ public abstract class AbstractActiveService implements ActiveServiceStatusProvid
 	 */
 	private Thread refreshThread;
 	
-	private Collection<ActiveServiceStatusListener> listeners;
-	
 	
 	public AbstractActiveService() {
 		super();
-		this.listeners = new ArrayList<ActiveServiceStatusListener>();
 	}
 	
-
-	/**
-	 * {@inheritDoc}
-	 */
-	public boolean addStatusListener(ActiveServiceStatusListener listener) {
-		return this.listeners.add(listener);
-	}
-	
-	/**
-	 * {@inheritDoc}
-	 */
-	public boolean removeStatusListener(ActiveServiceStatusListener listener) {
-		return this.listeners.remove(listener);
-	}
 
 	public void activate() {
+		shutdown = false;
 		start();
 	}
 
@@ -89,7 +70,6 @@ public abstract class AbstractActiveService implements ActiveServiceStatusProvid
 		shutdown();
 	}
 	
-
 	/**
 	 * Takes care about starting the refresh thread. It creates a new
 	 * RefreshThread if no instance exists.
@@ -161,18 +141,6 @@ public abstract class AbstractActiveService implements ActiveServiceStatusProvid
 	 */
 	protected abstract String getName();
 	
-	private void notifyStarted() {
-		for (ActiveServiceStatusListener listener : listeners) {
-			listener.started();
-		}
-	}
-	
-	private void notifyShutdownCompleted() {
-		for (ActiveServiceStatusListener listener : listeners) {
-			listener.shutdownCompleted();
-		}
-	}
-	
 	/**
 	 * Worker thread which calls the execute method frequently.
 	 *  
@@ -193,7 +161,6 @@ public abstract class AbstractActiveService implements ActiveServiceStatusProvid
 		
 		@Override
 		public void run() {
-			notifyStarted();
 			logger.debug(getName() + " has been started");
 			
 			while (!shutdown) {
@@ -206,7 +173,6 @@ public abstract class AbstractActiveService implements ActiveServiceStatusProvid
 			}
 			
 			refreshThread = null;
-			notifyShutdownCompleted();
 			logger.info(getName() + " has been shut down");
 		}
 		

@@ -171,9 +171,9 @@ public class Db4oPersistenceService implements QueryablePersistenceService {
 			}
 			
 			if(filter.getOrdering()==Ordering.ASCENDING) {
-				query.descend("timestamp").orderDescending();
-			} else {
 				query.descend("timestamp").orderAscending();
+			} else {
+				query.descend("timestamp").orderDescending();
 			}
 			ObjectSet<HistoricItem> results = query.execute();
 	
@@ -287,8 +287,13 @@ public class Db4oPersistenceService implements QueryablePersistenceService {
 				db.commit();
 				logger.trace("successfully commited db4o transaction in {}ms", System.currentTimeMillis() - startTime);
 			} catch(Db4oException e) {
-				db.rollback();
-				logger.warn("Error committing transaction : {}", e.getMessage());
+				try {
+					db.rollback();
+					logger.warn("Error committing transaction : {}", e.getMessage());
+				} catch(DatabaseClosedException dce) {
+					// ignore a failed rollback if database is closed (what happens regularly during shutdown)
+					logger.debug("Cannot roll back transaction because database is closed: {}", e.getMessage());
+				}
 			}
 		}
 		

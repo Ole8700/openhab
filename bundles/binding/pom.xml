@@ -1,5 +1,5 @@
-<?xml version="1.0" encoding="UTF-8"?>
-<project xmlns="http://maven.apache.org/POM/4.0.0" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xsi:schemaLocation="http://maven.apache.org/POM/4.0.0 http://maven.apache.org/maven-v4_0_0.xsd">
+<?xml version="1.0" encoding="MACROMAN"?>
+<project xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xmlns="http://maven.apache.org/POM/4.0.0" xsi:schemaLocation="http://maven.apache.org/POM/4.0.0 http://maven.apache.org/maven-v4_0_0.xsd">
 
   <parent>
     <groupId>org.openhab</groupId>
@@ -27,6 +27,7 @@
     <module>org.openhab.binding.exec.test</module>
     <module>org.openhab.binding.http</module>
     <module>org.openhab.binding.http.test</module>
+    <module>org.openhab.binding.hue</module>
     <module>org.openhab.binding.fritzbox</module>
     <module>org.openhab.binding.ntp</module>
     <module>org.openhab.binding.mpd</module>
@@ -42,7 +43,12 @@
     <module>org.openhab.binding.plugwise</module>
     <module>org.openhab.binding.modbus</module>
     <module>org.openhab.binding.plcbus</module>
-    <module>org.openhab.binding.koubachi</module>
+    <module>org.openhab.binding.dmx</module>
+    <module>org.openhab.binding.dmx.ola</module>
+    <module>org.openhab.binding.dmx.lib485</module>
+    <module>org.openhab.binding.dmx.test</module>
+    <module>org.openhab.binding.rfxcom</module>
+    <module>org.openhab.binding.samsungtv</module>
   </modules>
 
 </project>
