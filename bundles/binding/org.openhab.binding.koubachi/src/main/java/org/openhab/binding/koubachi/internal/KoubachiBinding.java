@@ -33,8 +33,6 @@ import java.util.List;
 import org.openhab.binding.koubachi.KoubachiBindingProvider;
 import org.openhab.binding.koubachi.internal.api.Device;
 import org.openhab.binding.koubachi.internal.api.KoubachiConnector;
-import org.openhab.binding.koubachi.internal.api.KoubachiDeviceMapping;
-import org.openhab.binding.koubachi.internal.api.KoubachiPlantMapping;
 import org.openhab.binding.koubachi.internal.api.Plant;
 import org.openhab.core.binding.AbstractActiveBinding;
 import org.openhab.core.library.types.DecimalType;
@@ -46,7 +44,7 @@ import org.slf4j.LoggerFactory;
 
 /**
  * @author Thomas.Eichstaedt-Engelen
- * @since 1.1.0
+ * @since 1.2.0
  */
 public class KoubachiBinding extends AbstractActiveBinding<KoubachiBindingProvider> {
 
@@ -90,27 +88,27 @@ public class KoubachiBinding extends AbstractActiveBinding<KoubachiBindingProvid
 			for (String itemName : provider.getItemNames()) {
 				
 				if (itemName.startsWith("Device")) {
-					KoubachiDeviceMapping deviceMapping = provider.getDeviceMappingBy(itemName);
+//					KoubachiDeviceMapping deviceMapping = provider.getDeviceMappingBy(itemName);
 					Device device = findDevice(itemName, devices);
 					
-					Object value = device.get(deviceMapping.getDataKey());
-					if (value != null) {
-						State state = createState(deviceMapping.getItemType(), value);
-						if (state != null) {
-							eventPublisher.postUpdate(itemName, state);
-						}
-					}
+//					Object value = device.get(deviceMapping.getDataKey());
+//					if (value != null) {
+//						State state = createState(deviceMapping.getItemType(), value);
+//						if (state != null) {
+//							eventPublisher.postUpdate(itemName, state);
+//						}
+//					}
 				} else if (itemName.startsWith("Plant")){
-					KoubachiPlantMapping plantMapping = provider.getPlantMappingBy(itemName);
+//					KoubachiPlantMapping plantMapping = provider.getPlantMappingBy(itemName);
 					Plant plant = findPlant(itemName, plants);
 					
-					Object value = plant.get(plantMapping.getDataKey());
-					if (value != null) {
-						State state = createState(plantMapping.getItemType(), value);
-						if (state != null) {
-							eventPublisher.postUpdate(itemName, state);
-						}
-					}
+//					Object value = plant.get(plantMapping.getDataKey());
+//					if (value != null) {
+//						State state = createState(plantMapping.getItemType(), value);
+//						if (state != null) {
+//							eventPublisher.postUpdate(itemName, state);
+//						}
+//					}
 				} else {
 					throw new IllegalArgumentException("Item '" + itemName + "' cannot be processed");
 				}
@@ -122,7 +120,7 @@ public class KoubachiBinding extends AbstractActiveBinding<KoubachiBindingProvid
 		String[] itemNameElements = itemName.split("_");
 		String id = itemNameElements[1];
 		for (Device device : devices) {
-			if (device.getId().equals(id)) {
+			if (device.getMacAddress().equals(id)) {
 				return device;
 			}
 		}

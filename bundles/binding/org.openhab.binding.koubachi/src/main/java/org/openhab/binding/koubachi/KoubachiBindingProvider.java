@@ -28,8 +28,6 @@
  */
 package org.openhab.binding.koubachi;
 
-import org.openhab.binding.koubachi.internal.api.KoubachiDeviceMapping;
-import org.openhab.binding.koubachi.internal.api.KoubachiPlantMapping;
 import org.openhab.core.binding.BindingProvider;
 
 
@@ -41,12 +39,10 @@ import org.openhab.core.binding.BindingProvider;
  * taken into account.
  * 
  * @author Thomas.Eichstaedt-Engelen
- * @since 1.1.0
+ * @since 1.2.0
  */
 public interface KoubachiBindingProvider extends BindingProvider {
 	
-	KoubachiDeviceMapping getDeviceMappingBy(String itemName);
-	
-	KoubachiPlantMapping getPlantMappingBy(String itemName);
+	String getPropertyName(String itemName);
 
 }

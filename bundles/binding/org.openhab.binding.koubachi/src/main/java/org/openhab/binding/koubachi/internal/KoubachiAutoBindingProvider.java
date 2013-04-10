@@ -28,6 +28,7 @@
  */
 package org.openhab.binding.koubachi.internal;
 
+import java.lang.reflect.Method;
 import java.util.Collection;
 import java.util.HashMap;
 import java.util.List;
@@ -36,9 +37,6 @@ import java.util.Map;
 import org.openhab.binding.koubachi.KoubachiBindingProvider;
 import org.openhab.binding.koubachi.internal.api.Device;
 import org.openhab.binding.koubachi.internal.api.KoubachiConnector;
-import org.openhab.binding.koubachi.internal.api.KoubachiDataMapping;
-import org.openhab.binding.koubachi.internal.api.KoubachiDeviceMapping;
-import org.openhab.binding.koubachi.internal.api.KoubachiPlantMapping;
 import org.openhab.binding.koubachi.internal.api.Plant;
 import org.openhab.core.binding.BindingChangeListener;
 
@@ -50,27 +48,35 @@ import org.openhab.core.binding.BindingChangeListener;
  * </ul>
  * 
  * @author Thomas.Eichstaedt-Engelen
- * @since 1.1.0
+ * @since 1.2.0
  */
 public class KoubachiAutoBindingProvider implements KoubachiBindingProvider {
 	
-	Map<String, KoubachiDataMapping> bindingConfig = new HashMap<String, KoubachiDataMapping>();
+	Map<String, String> bindingConfig = new HashMap<String, String>();
 	
 
 	public KoubachiAutoBindingProvider() {
 		List<Device> devices = KoubachiConnector.getDevices();
 		for (Device device : devices) {
-			String baseItemName = "Device_" + device.getId();
-			for (KoubachiDeviceMapping mapping : KoubachiDeviceMapping.values()) {
-				bindingConfig.put(baseItemName + mapping.getItemPostfix(), mapping);
+			String baseItemName = "Device_" + device.getMacAddress();
+			
+			Method[] methods = device.getClass().getMethods();
+			for (Method method : methods) {
+				if (method.getName().startsWith("get")) {
+//					bindingConfig.put(baseItemName + mapping.getItemPostfix(), mapping);
+				}
 			}
 		}
 		
 		List<Plant> plants = KoubachiConnector.getPlants();
 		for (Plant plant : plants) {
 			String baseItemName = "Plant_" + plant.getId();
-			for (KoubachiPlantMapping mapping : KoubachiPlantMapping.values()) {
-				bindingConfig.put(baseItemName + mapping.getItemPostfix(), mapping);
+			
+			Method[] methods = plant.getClass().getMethods();
+			for (Method method : methods) {
+				if (method.getName().startsWith("get")) {
+//					bindingConfig.put(baseItemName + mapping.getItemPostfix(), mapping);
+				}
 			}
 		}
 	}
@@ -103,13 +109,8 @@ public class KoubachiAutoBindingProvider implements KoubachiBindingProvider {
 
 	
 	@Override
-	public KoubachiDeviceMapping getDeviceMappingBy(String itemName) {
-		return (KoubachiDeviceMapping) (bindingConfig.containsKey(itemName) ? bindingConfig.get(itemName) : null);
-	}
-
-	@Override
-	public KoubachiPlantMapping getPlantMappingBy(String itemName) {
-		return (KoubachiPlantMapping) (bindingConfig.containsKey(itemName) ? bindingConfig.get(itemName) : null);
+	public String getPropertyName(String itemName) {
+		return (String) (bindingConfig.containsKey(itemName) ? bindingConfig.get(itemName) : null);
 	}
 	
 	
