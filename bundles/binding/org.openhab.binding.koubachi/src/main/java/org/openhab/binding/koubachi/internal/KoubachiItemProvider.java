@@ -1,13 +1,12 @@
 package org.openhab.binding.koubachi.internal;
 
+import java.lang.reflect.Method;
 import java.util.ArrayList;
 import java.util.Collection;
 import java.util.List;
 
 import org.openhab.binding.koubachi.internal.api.Device;
 import org.openhab.binding.koubachi.internal.api.KoubachiConnector;
-import org.openhab.binding.koubachi.internal.api.KoubachiDeviceMapping;
-import org.openhab.binding.koubachi.internal.api.KoubachiPlantMapping;
 import org.openhab.binding.koubachi.internal.api.Plant;
 import org.openhab.core.items.GroupItem;
 import org.openhab.core.items.Item;
@@ -18,7 +17,7 @@ import org.slf4j.LoggerFactory;
 
 /**
  * @author Thomas.Eichstaedt-Engelen
- * @since 1.1.0
+ * @since 1.2.0
  */
 public class KoubachiItemProvider extends AbstractItemProvider {
 
@@ -34,12 +33,16 @@ public class KoubachiItemProvider extends AbstractItemProvider {
 		items.add(new GroupItem("Devices"));
 		for (Device device : KoubachiConnector.getDevices()) {
 
-			String baseItemName = "Device_" + device.getId();
+			String baseItemName = "Device_" + device.getMacAddress();
 			items.add(new GroupItem(baseItemName));
-			for (KoubachiDeviceMapping deviceMapping : KoubachiDeviceMapping.values()) {
-				String itemName = baseItemName + deviceMapping.getItemPostfix();
-				logger.debug("created new device item '{}'", itemName);
-				items.add(getItemOfType(deviceMapping.getItemType(), itemName));
+			
+			Method[] methods = device.getClass().getMethods();
+			for (Method method : methods) {
+				if (method.getName().startsWith("get") && !method.getName().equals("getClass")) {
+					String itemName = baseItemName + "_" + method.getName().replaceFirst("get", "");
+					logger.debug("created new device item '{}'", itemName);
+					items.add(getItemOfType(translateItemType(method.getReturnType().getSimpleName()), itemName));
+				}
 			}
 			
 			for (Item item : items) {
@@ -56,12 +59,16 @@ public class KoubachiItemProvider extends AbstractItemProvider {
 
 			String baseItemName = "Plant_" + plant.getId();
 			items.add(new GroupItem(baseItemName));
-			for (KoubachiPlantMapping plantMapping : KoubachiPlantMapping.values()) {
-				String itemName = baseItemName + plantMapping.getItemPostfix();
-				logger.debug("created new plant item '{}'", itemName);
-				items.add(getItemOfType(plantMapping.getItemType(), itemName));
+			
+			Method[] methods = plant.getClass().getMethods();
+			for (Method method : methods) {
+				if (method.getName().startsWith("get") && !method.getName().equals("getClass")) {
+					String itemName = baseItemName + "_" + method.getName().replaceFirst("get", "");
+					logger.debug("created new plant item '{}'", itemName);
+					items.add(getItemOfType(translateItemType(method.getReturnType().getSimpleName()), itemName));
+				}
 			}
-
+			
 			for (Item item : items) {
 				if (item != null && !(item instanceof GroupItem)) {
 					item.getGroupNames().add("Plants");
@@ -74,6 +81,18 @@ public class KoubachiItemProvider extends AbstractItemProvider {
 		System.err.println(items);
 		
 		return items;
+	}
+	
+	private String translateItemType(String origTypeName) {
+		if (origTypeName.equals("String")) {
+			return "String";
+		} else if (origTypeName.equals("BigDecimal")) {
+			return "Decimal";
+		} else if (origTypeName.equals("Date")) {
+			return "DateTime";
+		} else {
+			throw new IllegalArgumentException("Cannot handle type '" + origTypeName + "'");
+		}
 	}
 	
 

@@ -38,7 +38,7 @@ import org.slf4j.LoggerFactory;
  * Extension of the default OSGi bundle activator
  * 
  * @author Thomas.Eichstaedt-Engelen
- * @since 1.1.0
+ * @since 1.2.0
  */
 public final class KoubachiActivator implements BundleActivator {
 
