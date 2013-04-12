@@ -28,22 +28,14 @@
  */
 package org.openhab.model.item.binding;
 
-import java.util.ArrayList;
-import java.util.Collection;
 import java.util.Collections;
 import java.util.HashMap;
 import java.util.HashSet;
 import java.util.Map;
 import java.util.Set;
-import java.util.WeakHashMap;
 
-import org.openhab.core.binding.BindingChangeListener;
-import org.openhab.core.binding.BindingConfig;
-import org.openhab.core.binding.BindingProvider;
+import org.openhab.core.binding.AbstractBindingProvider;
 import org.openhab.core.items.Item;
-import org.openhab.model.item.internal.GenericItemProvider;
-import org.slf4j.Logger;
-import org.slf4j.LoggerFactory;
 
 /**
  * <p>This abstract class serves as a basis for implementations of binding providers that retrieve binding
@@ -56,43 +48,23 @@ import org.slf4j.LoggerFactory;
  * @since 0.6.0
  *
  */
-public abstract class AbstractGenericBindingProvider implements BindingConfigReader, BindingProvider {
-
-	private static final Logger logger = LoggerFactory.getLogger(AbstractGenericBindingProvider.class);
-
-	private Set<BindingChangeListener> listeners = Collections.synchronizedSet(new HashSet<BindingChangeListener>());
-
-	/** caches binding configurations. maps itemNames to {@link BindingConfig}s */
-	protected Map<String, BindingConfig> bindingConfigs = Collections.synchronizedMap(new WeakHashMap<String, BindingConfig>());
+public abstract class AbstractGenericBindingProvider extends AbstractBindingProvider implements BindingConfigReader {
 
 	/** 
 	 * stores information about the context of items. The map has this content
 	 * structure: context -> Set of Items
 	 */ 
-	protected Map<String, Set<Item>> contextMap = Collections.synchronizedMap(new HashMap<String, Set<Item>>());
+	protected Map<String, Set<Item>> contextMap = 
+		Collections.synchronizedMap(new HashMap<String, Set<Item>>());
 	
-
 	public AbstractGenericBindingProvider() {
 		super();
 	}
-
+	
 	/**
 	 * {@inheritDoc}
 	 */
-	public void addBindingChangeListener(BindingChangeListener listener) {
-		listeners.add(listener);
-	}
-
-	/**
-	 * {@inheritDoc}
-	 */
-	public void removeBindingChangeListener(BindingChangeListener listener) {
-		listeners.remove(listener);
-	}
-
-	/**
-	 * {@inheritDoc}
-	 */
+	@Override
 	public void processBindingConfiguration(String context, Item item, String bindingConfig) throws BindingConfigParseException {
 		Set<Item> items = contextMap.get(context);
 		if (items==null) {
@@ -102,10 +74,11 @@ public abstract class AbstractGenericBindingProvider implements BindingConfigRea
 			
 		items.add(item);
 	}
-
+	
 	/**
 	 * {@inheritDoc}
 	 */
+	@Override
 	public void removeConfigurations(String context) {
 		Set<Item> items = contextMap.get(context);
 		if(items!=null) {
@@ -117,41 +90,5 @@ public abstract class AbstractGenericBindingProvider implements BindingConfigRea
 			contextMap.remove(context);
 		}
 	}
-	
-	protected void addBindingConfig(Item item, BindingConfig config) {
-		bindingConfigs.put(item.getName(), config);
-		notifyListeners(item);
-	}
-
-	private void notifyListeners(Item item) {
-		for (BindingChangeListener listener : listeners) {
-            try {
-                listener.bindingChanged(this, item.getName());
-            } catch (Exception e) {
-                logger.error("Binding " + listener.getClass().getName() + " threw an exception: ", e);
-            }
-		}
-	}
-	
-	/**
-	 * @{inheritDoc}
-	 */
-	public boolean providesBindingFor(String itemName) {
-		return bindingConfigs.get(itemName) != null;
-	}
-	
-	/**
-	 * @{inheritDoc}
-	 */
-	public boolean providesBinding() {
-		return !bindingConfigs.isEmpty();
-	}
-	
-	/**
-	 * {@inheritDoc}
-	 */
-	public Collection<String> getItemNames() {
-		return new ArrayList<String>(bindingConfigs.keySet());
-	}	
 
 }
