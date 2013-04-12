@@ -35,6 +35,7 @@ import java.util.List;
 import java.util.Map;
 
 import org.eclipse.emf.common.util.EList;
+import org.openhab.core.items.AbstractItemProvider;
 import org.openhab.core.items.GenericItem;
 import org.openhab.core.items.GroupFunction;
 import org.openhab.core.items.GroupItem;
@@ -47,7 +48,6 @@ import org.openhab.model.ItemsStandaloneSetup;
 import org.openhab.model.core.EventType;
 import org.openhab.model.core.ModelRepository;
 import org.openhab.model.core.ModelRepositoryChangeListener;
-import org.openhab.model.item.AbstractItemProvider;
 import org.openhab.model.item.binding.BindingConfigParseException;
 import org.openhab.model.item.binding.BindingConfigReader;
 import org.openhab.model.items.ItemModel;

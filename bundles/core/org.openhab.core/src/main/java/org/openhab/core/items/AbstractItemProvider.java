@@ -26,7 +26,7 @@
  * (EPL), the licensors of this Program grant you additional permission
  * to convey the resulting work.
  */
-package org.openhab.model.item;
+package org.openhab.core.items;
 
 import java.util.ArrayList;
 import java.util.Collection;
@@ -40,7 +40,7 @@ import org.openhab.core.items.ItemsChangeListener;
 
 /**
  * @author Thomas.Eichstaedt-Engelen
- * @since 1.1.0
+ * @since 1.2.0
  */
 public abstract class AbstractItemProvider implements ItemProvider {
 
@@ -72,6 +72,7 @@ public abstract class AbstractItemProvider implements ItemProvider {
 
 
 	protected GenericItem getItemOfType(String itemType, String itemName) {
+		
 		System.err.println("itemType: " + itemType + ", itenName=" + itemName);
 		if (itemType == null) {
 			return null;
