@@ -28,46 +28,34 @@
  */
 package org.openhab.binding.koubachi.internal;
 
-import org.osgi.framework.BundleActivator;
-import org.osgi.framework.BundleContext;
-import org.slf4j.Logger;
-import org.slf4j.LoggerFactory;
-
+import org.openhab.core.items.Item;
+import org.openhab.model.sitemap.Widget;
+import org.openhab.ui.items.ItemUIProvider;
 
 /**
- * Extension of the default OSGi bundle activator
- * 
  * @author Thomas.Eichstaedt-Engelen
  * @since 1.2.0
  */
-public final class KoubachiActivator implements BundleActivator {
+public class KoubachiItemUIProvider implements ItemUIProvider {
 
-	private static Logger logger = LoggerFactory.getLogger(KoubachiActivator.class); 
-	
-	private static BundleContext context;
-	
-	/**
-	 * Called whenever the OSGi framework starts our bundle
-	 */
-	public void start(BundleContext bc) throws Exception {
-		context = bc;
-		logger.debug("Koubachi binding has been started.");
+	@Override
+	public String getIcon(String itemName) {
+		return "grass";
 	}
 
-	/**
-	 * Called whenever the OSGi framework stops our bundle
-	 */
-	public void stop(BundleContext bc) throws Exception {
-		context = null;
-		logger.debug("Koubachi binding has been stopped.");
+	@Override
+	public String getLabel(String itemName) {
+		return itemName + " [%s]";
 	}
-	
-	/**
-	 * Returns the bundle context of this bundle
-	 * @return the bundle context
-	 */
-	public static BundleContext getContext() {
-		return context;
+
+	@Override
+	public Widget getDefaultWidget(Class<? extends Item> itemType, String itemName) {
+		return null;
+	}
+
+	@Override
+	public Widget getWidget(String itemName) {
+		return null;
 	}
 
 }

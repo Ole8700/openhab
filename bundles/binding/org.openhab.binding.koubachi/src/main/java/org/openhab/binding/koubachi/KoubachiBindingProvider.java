@@ -1,6 +1,6 @@
 /**
  * openHAB, the open Home Automation Bus.
- * Copyright (C) 2010-2012, openHAB.org <admin@openhab.org>
+ * Copyright (C) 2010-2013, openHAB.org <admin@openhab.org>
  *
  * See the contributors.txt file in the distribution for a
  * full listing of individual contributors.
@@ -28,6 +28,7 @@
  */
 package org.openhab.binding.koubachi;
 
+import org.openhab.binding.koubachi.internal.KoubachiAutoBindingProvider.KoubachiBindingConfig;
 import org.openhab.core.binding.BindingProvider;
 
 
@@ -43,6 +44,6 @@ import org.openhab.core.binding.BindingProvider;
  */
 public interface KoubachiBindingProvider extends BindingProvider {
 	
-	String getPropertyName(String itemName);
+	KoubachiBindingConfig getConfig(String itemName);
 
 }

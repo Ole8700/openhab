@@ -1,6 +1,6 @@
 /**
  * openHAB, the open Home Automation Bus.
- * Copyright (C) 2010-2012, openHAB.org <admin@openhab.org>
+ * Copyright (C) 2010-2013, openHAB.org <admin@openhab.org>
  *
  * See the contributors.txt file in the distribution for a
  * full listing of individual contributors.
@@ -28,13 +28,20 @@
  */
 package org.openhab.binding.koubachi.internal;
 
+import java.math.BigDecimal;
+import java.util.Calendar;
+import java.util.Date;
 import java.util.List;
 
+import org.apache.commons.beanutils.PropertyUtils;
 import org.openhab.binding.koubachi.KoubachiBindingProvider;
+import org.openhab.binding.koubachi.internal.KoubachiAutoBindingProvider.KoubachiBindingConfig;
+import org.openhab.binding.koubachi.internal.api.AbstractKoubachiData;
 import org.openhab.binding.koubachi.internal.api.Device;
 import org.openhab.binding.koubachi.internal.api.KoubachiConnector;
 import org.openhab.binding.koubachi.internal.api.Plant;
 import org.openhab.core.binding.AbstractActiveBinding;
+import org.openhab.core.library.types.DateTimeType;
 import org.openhab.core.library.types.DecimalType;
 import org.openhab.core.library.types.StringType;
 import org.openhab.core.types.State;
@@ -86,72 +93,53 @@ public class KoubachiBinding extends AbstractActiveBinding<KoubachiBindingProvid
 		
 		for (KoubachiBindingProvider provider : providers) {
 			for (String itemName : provider.getItemNames()) {
+				KoubachiBindingConfig config = provider.getConfig(itemName);
 				
-				if (itemName.startsWith("Device")) {
-//					KoubachiDeviceMapping deviceMapping = provider.getDeviceMappingBy(itemName);
-					Device device = findDevice(itemName, devices);
-					
-//					Object value = device.get(deviceMapping.getDataKey());
-//					if (value != null) {
-//						State state = createState(deviceMapping.getItemType(), value);
-//						if (state != null) {
-//							eventPublisher.postUpdate(itemName, state);
-//						}
-//					}
-				} else if (itemName.startsWith("Plant")){
-//					KoubachiPlantMapping plantMapping = provider.getPlantMappingBy(itemName);
-					Plant plant = findPlant(itemName, plants);
-					
-//					Object value = plant.get(plantMapping.getDataKey());
-//					if (value != null) {
-//						State state = createState(plantMapping.getItemType(), value);
-//						if (state != null) {
-//							eventPublisher.postUpdate(itemName, state);
-//						}
-//					}
+				if ("Device".equals(config.type)) {
+					Device device = findDataElement(config.id, devices);
+					postValue(itemName, config, device);
+				} else if ("Plant".equals(config.type)){
+					Plant plant = findDataElement(config.id, plants);
+					postValue(itemName, config, plant);
 				} else {
 					throw new IllegalArgumentException("Item '" + itemName + "' cannot be processed");
 				}
 			}
 		}
 	}
+
+	private void postValue(String itemName, KoubachiBindingConfig config, AbstractKoubachiData data) {
+		try {
+			Object value = PropertyUtils.getProperty(data, config.propertyName);
+			State state = createState(value);
+			if (state != null) {
+				eventPublisher.postUpdate(itemName, state);
+			}
+		} catch (Exception e) {
+			logger.error("getting property '{}' from item '{}' failed.", config.propertyName, itemName);
+		}
+	}
 	
-	private Device findDevice(String itemName, List<Device> devices) {
-		String[] itemNameElements = itemName.split("_");
-		String id = itemNameElements[1];
-		for (Device device : devices) {
-			if (device.getMacAddress().equals(id)) {
-				return device;
+	
+	@SuppressWarnings("unchecked")
+	private <D extends AbstractKoubachiData> D findDataElement(String id, List<? extends AbstractKoubachiData> dataElements) {
+		for (AbstractKoubachiData dataElement : dataElements) {
+			if (dataElement.getId().equals(id)) {
+				return (D) dataElement;
 			}
 		}
 		return null;
 	}
 	
-	private Plant findPlant(String itemName, List<Plant> plants) {
-		String[] itemNameElements = itemName.split("_");
-		Integer id = Integer.valueOf(itemNameElements[1]);
-		for (Plant plant : plants) {
-			if (plant.getId().equals(id)) {
-				return plant;
-			}
-		}
-		return null;
-	}
-	
-	private State createState(String itemType, Object value) {
-		if ("String".equals(itemType)) {
-			return new StringType((String) value);
-		} else if ("Number".equals(itemType)) {
-			if (value instanceof Number) {
-				return new DecimalType(value.toString());
-			} else if (value instanceof String) {
-				String stringValue = ((String) value).replaceAll("[^\\d|.]", "");
-				return new DecimalType(stringValue);
-			} else {
-				return null;
-			}
+	private State createState(Object value) {
+		if (value instanceof BigDecimal) {
+			return new DecimalType((String) value);
+		} else if (value instanceof Date) {
+			Calendar calendar = Calendar.getInstance();
+				calendar.setTime((Date) value);
+			return new DateTimeType(calendar);
 		} else {
-			return null;
+			return new StringType((String) value);
 		}
 	}
 	
