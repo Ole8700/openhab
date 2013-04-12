@@ -1,6 +1,6 @@
 /**
  * openHAB, the open Home Automation Bus.
- * Copyright (C) 2010-2012, openHAB.org <admin@openhab.org>
+ * Copyright (C) 2010-2013, openHAB.org <admin@openhab.org>
  *
  * See the contributors.txt file in the distribution for a
  * full listing of individual contributors.
@@ -36,9 +36,8 @@ import org.codehaus.jackson.annotate.JsonProperty;
 
 
 @JsonIgnoreProperties(ignoreUnknown = true)
-public class Device {
+public class Device extends AbstractKoubachiData {
 	
-	String macAddress;
 	BigDecimal virtualBatteryLevel;
 	
 	Date lastTransmission;
@@ -48,10 +47,12 @@ public class Device {
 	String recentTemperatureReadingValue;
 	String recentLightReadingValue;
 	
+	
 	@JsonProperty("mac_address")
-	public String getMacAddress() {
-		return macAddress;
+	public void setId(String id) {
+		this.id = id;
 	}
+	
 		
 	@JsonProperty("virtual_battery_level")
 	public BigDecimal getVirtualBatteryLevel() {
