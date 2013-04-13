@@ -1,6 +1,6 @@
 /**
  * openHAB, the open Home Automation Bus.
- * Copyright (C) 2010-2012, openHAB.org <admin@openhab.org>
+ * Copyright (C) 2010-2013, openHAB.org <admin@openhab.org>
  *
  * See the contributors.txt file in the distribution for a
  * full listing of individual contributors.
@@ -28,14 +28,15 @@
  */
 package org.openhab.binding.koubachi;
 
+import org.openhab.binding.koubachi.internal.api.KoubachiResourceType;
 import org.openhab.core.binding.BindingProvider;
-
+import org.openhab.core.items.Item;
 
 /**
  * This interface is implemented by classes that can provide mapping information
  * between openHAB items and Koubachi items.
  * 
- * Implementing classes should register themselves as a service in order to be 
+ * Implementing classes should register themselves as a service in order to be
  * taken into account.
  * 
  * @author Thomas.Eichstaedt-Engelen
@@ -43,6 +44,28 @@ import org.openhab.core.binding.BindingProvider;
  */
 public interface KoubachiBindingProvider extends BindingProvider {
 	
-	String getPropertyName(String itemName);
+	/**
+	 * Returns the configured Koubachi resource type of the given {@code itemName}.
+	 * 
+	 * @param itemName the item for which to find a resource type.
+	 * @return the type of the Item identified by {@code itemName}
+	 */
+	KoubachiResourceType getResourceType(String itemName);
+
+	/**
+	 * Returns the configured Koubachi resource id of the given {@code itemName}.
+	 * 
+	 * @param itemName the item for which to find a resource id.
+	 * @return the resource id of the {@link Item} identified by {@code itemName}
+	 */
+	String getResourceId(String itemName);
+
+	/**
+	 * Returns the configured Koubachi property name of the given {@code itemName}.
+	 * 
+	 * @param itemName the item for which to find a property name.
+	 * @return the property name of the {@link Item} identified by {@code itemName}
+	 */
+	String getPropertyName(String itemName);	
 
 }

@@ -26,48 +26,20 @@
  * (EPL), the licensors of this Program grant you additional permission
  * to convey the resulting work.
  */
-package org.openhab.binding.koubachi.internal;
-
-import org.osgi.framework.BundleActivator;
-import org.osgi.framework.BundleContext;
-import org.slf4j.Logger;
-import org.slf4j.LoggerFactory;
-
+package org.openhab.binding.koubachi.internal.api;
 
 /**
- * Extension of the default OSGi bundle activator
- * 
+ * The Superclass of all Koubachi resources. Holds common fields an methods. 
+ *  
  * @author Thomas.Eichstaedt-Engelen
  * @since 1.2.0
  */
-public final class KoubachiActivator implements BundleActivator {
+public abstract class KoubachiResource {
 
-	private static Logger logger = LoggerFactory.getLogger(KoubachiActivator.class); 
-	
-	private static BundleContext context;
-	
-	/**
-	 * Called whenever the OSGi framework starts our bundle
-	 */
-	public void start(BundleContext bc) throws Exception {
-		context = bc;
-		logger.debug("Koubachi binding has been started.");
-	}
+	protected String id;
 
-	/**
-	 * Called whenever the OSGi framework stops our bundle
-	 */
-	public void stop(BundleContext bc) throws Exception {
-		context = null;
-		logger.debug("Koubachi binding has been stopped.");
-	}
-	
-	/**
-	 * Returns the bundle context of this bundle
-	 * @return the bundle context
-	 */
-	public static BundleContext getContext() {
-		return context;
+	public String getId() {
+		return id;
 	}
 
 }

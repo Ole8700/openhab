@@ -1,6 +1,6 @@
 /**
  * openHAB, the open Home Automation Bus.
- * Copyright (C) 2010-2012, openHAB.org <admin@openhab.org>
+ * Copyright (C) 2010-2013, openHAB.org <admin@openhab.org>
  *
  * See the contributors.txt file in the distribution for a
  * full listing of individual contributors.
@@ -29,17 +29,29 @@
 package org.openhab.binding.koubachi.internal.api;
 
 import java.math.BigDecimal;
+import java.util.Date;
 
 import org.codehaus.jackson.annotate.JsonIgnoreProperties;
 import org.codehaus.jackson.annotate.JsonProperty;
 
-
+/**
+ * Represents a plant in the Koubachi domain.
+ * 
+ * @author Thomas.Eichstaedt-Engelen
+ * @since 1.2.0
+ */
 @JsonIgnoreProperties(ignoreUnknown = true)
-public class Plant {
+public class Plant extends KoubachiResource {
 	
-	BigDecimal id;
 	String name;
 	String location;
+	
+	Date lastFertilizerAt;
+	Date nextFertilizerAt;
+	Date lastMistAt;
+	Date nextMistAt;
+	Date lastWaterAt;
+	Date nextWaterAt;
 	
 	String vdmWaterInstruction;
 	BigDecimal vdmWaterLevel;
@@ -47,12 +59,13 @@ public class Plant {
 	BigDecimal vdmMistLevel;
 	String vdmFertilizerInstruction;
 	BigDecimal vdmFertilizerLevel;
+	String vdmTemperatureHint;
+	String vdmTemperatureInstruction;
+	BigDecimal vdmTemperatureLevel;
+	String vdmLightHint;
 	String vdmLightInstruction;
 	BigDecimal vdmLightLevel;
 	
-	public BigDecimal getId() {
-		return id;
-	}
 	
 	public String getName() {
 		return name;
@@ -61,6 +74,38 @@ public class Plant {
 	public String getLocation() {
 		return location;
 	}
+	
+	
+	@JsonProperty("last_fertilizer_at")
+	public Date getLastFertilizerAt() {
+		return lastFertilizerAt;
+	}
+	
+	@JsonProperty("next_fertilizer_at")
+	public Date getNextFertilizerAt() {
+		return nextFertilizerAt;
+	}
+	
+	@JsonProperty("last_mist_at")
+	public Date getLastMistAt() {
+		return lastMistAt;
+	}
+	
+	@JsonProperty("next_mist_at")
+	public Date getNextMistAt() {
+		return nextMistAt;
+	}
+	
+	@JsonProperty("last_water_at")
+	public Date getLastWaterAt() {
+		return lastWaterAt;
+	}
+	
+	@JsonProperty("next_water_at")
+	public Date getNextWaterAt() {
+		return nextWaterAt;
+	}
+	
 	
 	@JsonProperty("vdm_water_instruction")
 	public String getVdmWaterInstruction() {
@@ -92,6 +137,26 @@ public class Plant {
 		return vdmFertilizerLevel;
 	}
 	
+	@JsonProperty("vdm_temperature_hint")
+	public String getVdmTemperatureHint() {
+		return vdmTemperatureHint;
+	}
+	
+	@JsonProperty("vdm_temperature_instruction")
+	public String getVdmTemperatureInstruction() {
+		return vdmTemperatureInstruction;
+	}
+
+	@JsonProperty("vdm_temperature_level")
+	public BigDecimal getVdmTemperatureLevel() {
+		return vdmTemperatureLevel;
+	}
+	
+	@JsonProperty("vdm_light_hint")
+	public String getVdmLightHint() {
+		return vdmLightHint;
+	}
+	
 	@JsonProperty("vdm_light_instruction")
 	public String getVdmLightInstruction() {
 		return vdmLightInstruction;
@@ -100,6 +165,26 @@ public class Plant {
 	@JsonProperty("vdm_light_level")
 	public BigDecimal getVdmLightLevel() {
 		return vdmLightLevel;
+	}
+
+	@Override
+	public String toString() {
+		return "Plant [name=" + name + ", location=" + location
+				+ ", lastFertilizerAt=" + lastFertilizerAt
+				+ ", nextFertilizerAt=" + nextFertilizerAt + ", lastMistAt="
+				+ lastMistAt + ", nextMistAt=" + nextMistAt + ", lastWaterAt="
+				+ lastWaterAt + ", nextWaterAt=" + nextWaterAt
+				+ ", vdmWaterInstruction=" + vdmWaterInstruction
+				+ ", vdmWaterLevel=" + vdmWaterLevel + ", vdmMistInstruction="
+				+ vdmMistInstruction + ", vdmMistLevel=" + vdmMistLevel
+				+ ", vdmFertilizerInstruction=" + vdmFertilizerInstruction
+				+ ", vdmFertilizerLevel=" + vdmFertilizerLevel
+				+ ", vdmTemperatureHint=" + vdmTemperatureHint
+				+ ", vdmTemperatureInstruction=" + vdmTemperatureInstruction
+				+ ", vdmTemperatureLevel=" + vdmTemperatureLevel
+				+ ", vdmLightHint=" + vdmLightHint + ", vdmLightInstruction="
+				+ vdmLightInstruction + ", vdmLightLevel=" + vdmLightLevel
+				+ "]";
 	}
 	
 }

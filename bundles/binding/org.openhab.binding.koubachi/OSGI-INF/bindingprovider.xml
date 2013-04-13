@@ -2,7 +2,7 @@
 <!--
 
     openHAB, the open Home Automation Bus.
-    Copyright (C) 2011, openHAB.org <admin@openhab.org>
+    Copyright (C) 2010-2013, openHAB.org <admin@openhab.org>
 
     See the contributors.txt file in the distribution for a
     full listing of individual contributors.
@@ -30,9 +30,10 @@
 
 -->
 
-<scr:component xmlns:scr="http://www.osgi.org/xmlns/scr/v1.1.0" name="org.openhab.binding.koubachi.binding.provider">
-   <implementation class="org.openhab.binding.koubachi.internal.KoubachiAutoBindingProvider"/>
+<scr:component xmlns:scr="http://www.osgi.org/xmlns/scr/v1.1.0" name="org.openhab.binding.koubachi.bindingprovider">
+   <implementation class="org.openhab.binding.koubachi.internal.KoubachiGenericBindingProvider"/>
    <service>
+      <provide interface="org.openhab.model.item.binding.BindingConfigReader"/>
       <provide interface="org.openhab.binding.koubachi.KoubachiBindingProvider"/>
    </service>
 </scr:component>

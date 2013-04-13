@@ -2,7 +2,7 @@
 <!--
 
     openHAB, the open Home Automation Bus.
-    Copyright (C) 2011, openHAB.org <admin@openhab.org>
+    Copyright (C) 2010-2013, openHAB.org <admin@openhab.org>
 
     See the contributors.txt file in the distribution for a
     full listing of individual contributors.
@@ -32,7 +32,7 @@
 
 <scr:component xmlns:scr="http://www.osgi.org/xmlns/scr/v1.1.0" activate="activate" deactivate="deactivate" name="org.openhab.binding.koubachi">
    <implementation class="org.openhab.binding.koubachi.internal.KoubachiBinding"/>
-      
+   
    <reference bind="setEventPublisher" cardinality="1..1" interface="org.openhab.core.events.EventPublisher" name="EventPublisher" policy="dynamic" unbind="unsetEventPublisher"/>
    <reference bind="addBindingProvider" cardinality="1..n" interface="org.openhab.binding.koubachi.KoubachiBindingProvider" name="KoubachiBindingProvider" policy="dynamic" unbind="removeBindingProvider"/>
 </scr:component>
