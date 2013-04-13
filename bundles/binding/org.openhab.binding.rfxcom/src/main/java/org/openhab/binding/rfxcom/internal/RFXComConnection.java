@@ -1,6 +1,6 @@
 /**
  * openHAB, the open Home Automation Bus.
- * Copyright (C) 2010-2012, openHAB.org <admin@openhab.org>
+ * Copyright (C) 2010-2013, openHAB.org <admin@openhab.org>
  *
  * See the contributors.txt file in the distribution for a
  * full listing of individual contributors.
@@ -26,7 +26,6 @@
  * (EPL), the licensors of this Program grant you additional permission
  * to convey the resulting work.
  */
-
 package org.openhab.binding.rfxcom.internal;
 
 import gnu.io.NoSuchPortException;
@@ -47,10 +46,11 @@ import org.osgi.service.cm.ManagedService;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
+
 /**
  * This class establishes the connection to the RFXCOM controller.
  * 
- * @author Pauli Anttila
+ * @author Pauli Anttila, Evert van Es
  * @since 1.2.0
  */
 public class RFXComConnection implements ManagedService {
@@ -160,5 +160,6 @@ public class RFXComConnection implements ManagedService {
 			connector.sendMessage(RFXComMessageUtils.CMD_STATUS);
 		}
 	}
+	
 
 }

@@ -1,6 +1,6 @@
 /**
  * openHAB, the open Home Automation Bus.
- * Copyright (C) 2010-2012, openHAB.org <admin@openhab.org>
+ * Copyright (C) 2010-2013, openHAB.org <admin@openhab.org>
  *
  * See the contributors.txt file in the distribution for a
  * full listing of individual contributors.
@@ -26,7 +26,6 @@
  * (EPL), the licensors of this Program grant you additional permission
  * to convey the resulting work.
  */
-
 package org.openhab.binding.rfxcom.internal.connector;
 
 import java.io.IOException;
@@ -37,7 +36,7 @@ import org.slf4j.LoggerFactory;
 /**
  * RFXCOM connector for TCP/IP communication.
  * 
- * @author Pauli Anttila
+ * @author Pauli Anttila, Evert van Es
  * @since 1.2.0
  */
 public class RFXComTcpConnector implements RFXComConnectorInterface {
@@ -55,6 +54,12 @@ public class RFXComTcpConnector implements RFXComConnectorInterface {
 		logger.error("connect not implemented");
 	}
 
+	@Override
+	public void disconnect() {
+		logger.error("disconnect not implemented");
+	}
+	
+	
 	@Override
 	public void sendMessage(byte[] data) throws IOException {
 

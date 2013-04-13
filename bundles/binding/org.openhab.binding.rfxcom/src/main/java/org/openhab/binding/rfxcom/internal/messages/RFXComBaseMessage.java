@@ -1,6 +1,6 @@
 /**
  * openHAB, the open Home Automation Bus.
- * Copyright (C) 2010-2012, openHAB.org <admin@openhab.org>
+ * Copyright (C) 2010-2013, openHAB.org <admin@openhab.org>
  *
  * See the contributors.txt file in the distribution for a
  * full listing of individual contributors.
@@ -26,7 +26,6 @@
  * (EPL), the licensors of this Program grant you additional permission
  * to convey the resulting work.
  */
-
 package org.openhab.binding.rfxcom.internal.messages;
 
 import javax.xml.bind.DatatypeConverter;
@@ -43,7 +42,9 @@ public abstract class RFXComBaseMessage implements RFXComMessageInterface {
 		INTERFACE_CONTROL(0),
 		INTERFACE_MESSAGE(1),
 		TRANSMITTER_MESSAGE(2),
+		LIGHTING1(16),
 		LIGHTING2(17),
+		CURTAIN1(18),
 		TEMPERATURE_HUMIDITY(82),
 
 		UNKNOWN(255);
@@ -112,6 +113,10 @@ public abstract class RFXComBaseMessage implements RFXComMessageInterface {
 		str += "\n - Seq number = " + seqNbr;
 
 		return str;
+	}
+	
+	public String generateDeviceId() {
+	 return id1 + "." + id2;
 	}
 
 }
