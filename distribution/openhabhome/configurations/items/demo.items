@@ -7,9 +7,6 @@ Group Shutters 	(All)
 Group Weather 	(All)
 Group Status 	(All)
 
-Group Plants	(All)
-Group Devices	(All)
-
 Group GF_Living 	"Living Room" 	<video> 	(gGF)
 Group GF_Kitchen 	"Kitchen" 		<kitchen> 	(gGF)
 Group GF_Toilet 	"Toilet" 		<bath> 		(gGF)
