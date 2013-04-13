@@ -1,6 +1,6 @@
 /**
  * openHAB, the open Home Automation Bus.
- * Copyright (C) 2010-2012, openHAB.org <admin@openhab.org>
+ * Copyright (C) 2010-2013, openHAB.org <admin@openhab.org>
  *
  * See the contributors.txt file in the distribution for a
  * full listing of individual contributors.
@@ -28,13 +28,20 @@
  */
 package org.openhab.binding.koubachi.internal;
 
+import java.math.BigDecimal;
+import java.util.Calendar;
+import java.util.Date;
 import java.util.List;
 
+import org.apache.commons.beanutils.PropertyUtils;
 import org.openhab.binding.koubachi.KoubachiBindingProvider;
 import org.openhab.binding.koubachi.internal.api.Device;
 import org.openhab.binding.koubachi.internal.api.KoubachiConnector;
+import org.openhab.binding.koubachi.internal.api.KoubachiResource;
+import org.openhab.binding.koubachi.internal.api.KoubachiResourceType;
 import org.openhab.binding.koubachi.internal.api.Plant;
 import org.openhab.core.binding.AbstractActiveBinding;
+import org.openhab.core.library.types.DateTimeType;
 import org.openhab.core.library.types.DecimalType;
 import org.openhab.core.library.types.StringType;
 import org.openhab.core.types.State;
@@ -43,22 +50,16 @@ import org.slf4j.LoggerFactory;
 	
 
 /**
+ * Active Binding which queries the Koubachi server frequently.
+ * 
  * @author Thomas.Eichstaedt-Engelen
  * @since 1.2.0
  */
 public class KoubachiBinding extends AbstractActiveBinding<KoubachiBindingProvider> {
 
-	private static final Logger logger = 
-		LoggerFactory.getLogger(KoubachiBinding.class);	
+	private static final Logger logger =  LoggerFactory.getLogger(KoubachiBinding.class);
 	
-	/**
-	 * @{inheritDoc}
-	 */
-	@Override
-	protected long getRefreshInterval() {
-		return 30000;
-	}
-
+	
 	/**
 	 * @{inheritDoc}
 	 */
@@ -71,8 +72,16 @@ public class KoubachiBinding extends AbstractActiveBinding<KoubachiBindingProvid
 	 * @{inheritDoc}
 	 */
 	@Override
-	public boolean isProperlyConfigured() {
-		return true;
+	protected long getRefreshInterval() {
+		return KoubachiConnector.getRefreshInterval();
+	}
+
+	/**
+	 * @{inheritDoc}
+	 */
+	@Override
+	protected boolean isProperlyConfigured() {
+		return KoubachiConnector.isProperlyConfigured();
 	}
 	
 	/**
@@ -80,78 +89,69 @@ public class KoubachiBinding extends AbstractActiveBinding<KoubachiBindingProvid
 	 */
 	@Override
 	protected void execute() {
-		
 		List<Device> devices = KoubachiConnector.getDevices();
 		List<Plant> plants = KoubachiConnector.getPlants();
 		
 		for (KoubachiBindingProvider provider : providers) {
 			for (String itemName : provider.getItemNames()) {
+				KoubachiResourceType resourceType = provider.getResourceType(itemName);
+				String resourceId = provider.getResourceId(itemName);
+				String propertyName = provider.getPropertyName(itemName);
 				
-				if (itemName.startsWith("Device")) {
-//					KoubachiDeviceMapping deviceMapping = provider.getDeviceMappingBy(itemName);
-					Device device = findDevice(itemName, devices);
-					
-//					Object value = device.get(deviceMapping.getDataKey());
-//					if (value != null) {
-//						State state = createState(deviceMapping.getItemType(), value);
-//						if (state != null) {
-//							eventPublisher.postUpdate(itemName, state);
-//						}
-//					}
-				} else if (itemName.startsWith("Plant")){
-//					KoubachiPlantMapping plantMapping = provider.getPlantMappingBy(itemName);
-					Plant plant = findPlant(itemName, plants);
-					
-//					Object value = plant.get(plantMapping.getDataKey());
-//					if (value != null) {
-//						State state = createState(plantMapping.getItemType(), value);
-//						if (state != null) {
-//							eventPublisher.postUpdate(itemName, state);
-//						}
-//					}
+				KoubachiResource resource = null;
+				if (KoubachiResourceType.DEVICE.equals(resourceType)) {
+					resource = findResource(resourceId, devices);
 				} else {
-					throw new IllegalArgumentException("Item '" + itemName + "' cannot be processed");
+					resource = findResource(resourceId, plants);
+				}
+				
+				if (resource == null) {
+					logger.debug("Cannot find Koubachi resource with id '{}'", resourceId);
+					continue;
+				}
+				
+				try {
+					Object propertyValue = PropertyUtils.getProperty(resource, propertyName);
+					State state = createState(propertyValue.getClass(), propertyValue);
+					if (state != null) {
+						eventPublisher.postUpdate(itemName, state);
+					}
+				} catch (Exception e) {
+					logger.warn("Reading value '{}' from Resource '{}' throws went wrong", propertyName, resource);
 				}
 			}
 		}
 	}
 	
-	private Device findDevice(String itemName, List<Device> devices) {
-		String[] itemNameElements = itemName.split("_");
-		String id = itemNameElements[1];
-		for (Device device : devices) {
-			if (device.getMacAddress().equals(id)) {
-				return device;
+	@SuppressWarnings("unchecked")
+	private <R extends KoubachiResource> R findResource(String id, List<R> resources) {
+		for (KoubachiResource resource : resources) {
+			if (resource.getId().equals(id)) {
+				return (R) resource;
 			}
 		}
 		return null;
 	}
 	
-	private Plant findPlant(String itemName, List<Plant> plants) {
-		String[] itemNameElements = itemName.split("_");
-		Integer id = Integer.valueOf(itemNameElements[1]);
-		for (Plant plant : plants) {
-			if (plant.getId().equals(id)) {
-				return plant;
-			}
-		}
-		return null;
-	}
-	
-	private State createState(String itemType, Object value) {
-		if ("String".equals(itemType)) {
-			return new StringType((String) value);
-		} else if ("Number".equals(itemType)) {
-			if (value instanceof Number) {
-				return new DecimalType(value.toString());
-			} else if (value instanceof String) {
-				String stringValue = ((String) value).replaceAll("[^\\d|.]", "");
-				return new DecimalType(stringValue);
-			} else {
-				return null;
-			}
+	/**
+	 * Creates an openHAB {@link State} in accordance to the given {@code dataType}. Currently
+	 * {@link Date} and {@link BigDecimal} are handled explicitly. All other {@code dataTypes}
+	 * are mapped to {@link StringType}.
+	 * 
+	 * @param dataType
+	 * @param propertyValue
+	 * 
+	 * @return the new {@link State} in accordance to {@code dataType}. Will never be {@code null}.
+	 */
+	private State createState(Class<?> dataType, Object propertyValue) {
+		if (Date.class.isAssignableFrom(dataType)) {
+			Calendar calendar = Calendar.getInstance();
+			calendar.setTime((Date) propertyValue);
+			return new DateTimeType(calendar);
+		} else if (BigDecimal.class.isAssignableFrom(dataType)) {
+			return new DecimalType((BigDecimal) propertyValue);
 		} else {
-			return null;
+			return new StringType(propertyValue.toString());
 		}
 	}
 	
