@@ -1,6 +1,6 @@
 /**
  * openHAB, the open Home Automation Bus.
- * Copyright (C) 2010-2012, openHAB.org <admin@openhab.org>
+ * Copyright (C) 2010-2013, openHAB.org <admin@openhab.org>
  *
  * See the contributors.txt file in the distribution for a
  * full listing of individual contributors.
@@ -26,7 +26,6 @@
  * (EPL), the licensors of this Program grant you additional permission
  * to convey the resulting work.
  */
-
 package org.openhab.binding.rfxcom.internal.connector;
 
 import java.io.IOException;
@@ -34,7 +33,7 @@ import java.io.IOException;
 /**
  * This interface defines interface to communicate RFXCOM controller.
  * 
- * @author Pauli Anttila
+ * @author Pauli Anttila, Evert van Es
  * @since 1.2.0
  */
 public interface RFXComConnectorInterface {
@@ -48,6 +47,14 @@ public interface RFXComConnectorInterface {
 	 */
 	public void connect(String device) throws Exception;
 
+
+	/**
+	 * Procedure for disconnecting to RFXCOM controller.
+	 * 
+	 */
+	public void disconnect();
+	
+	
 	/**
 	 * Procedure for send raw data to RFXCOM controller.
 	 * 

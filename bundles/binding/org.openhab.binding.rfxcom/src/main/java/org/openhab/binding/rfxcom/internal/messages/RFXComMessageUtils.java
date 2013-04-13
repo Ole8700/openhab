@@ -1,6 +1,6 @@
 /**
  * openHAB, the open Home Automation Bus.
- * Copyright (C) 2010-2012, openHAB.org <admin@openhab.org>
+ * Copyright (C) 2010-2013, openHAB.org <admin@openhab.org>
  *
  * See the contributors.txt file in the distribution for a
  * full listing of individual contributors.
@@ -26,11 +26,9 @@
  * (EPL), the licensors of this Program grant you additional permission
  * to convey the resulting work.
  */
-
 package org.openhab.binding.rfxcom.internal.messages;
 
 import org.openhab.binding.rfxcom.internal.messages.RFXComBaseMessage.PacketType;
-import org.openhab.binding.rfxcom.internal.messages.RFXComLighting2Message.SubType;
 
 /**
  * This class provides utilities to encode and decode RFXCOM data.
@@ -52,7 +50,7 @@ public class RFXComMessageUtils {
 	 * 
 	 */
 	public final static byte[] CMD_STATUS = new byte[] { 0x0D, 0x00, 0x00,
-			0x00, 0x02, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00 };
+			0x01, 0x02, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00 };
 
 	/**
 	 * Command to save RFXCOM controller configuration.
@@ -77,8 +75,14 @@ public class RFXComMessageUtils {
 		case (byte) 0x02:
 			obj = new RFXComTransmitterMessage(data);
 			break;
+		case (byte) 0x10:
+			obj = new RFXComLighting1Message(data);
+			break;
 		case (byte) 0x11:
 			obj = new RFXComLighting2Message(data);
+			break;
+		case (byte) 0x18:
+			obj = new RFXComCurtain1Message(data);
 			break;
 		case (byte) 0x52:
 			obj = new RFXComTemperatureHumidityMessage(data);
@@ -96,14 +100,8 @@ public class RFXComMessageUtils {
 
 		byte[] data = null;
 
-		if (obj instanceof RFXComInterfaceMessage)
-			data = ((RFXComInterfaceMessage) obj).decodeMessage();
-
-		else if (obj instanceof RFXComLighting2Message)
-			data = ((RFXComLighting2Message) obj).decodeMessage();
-
-		else if (obj instanceof RFXComTemperatureHumidityMessage)
-			data = ((RFXComTemperatureHumidityMessage) obj).decodeMessage();
+		if (obj instanceof RFXComBaseMessage)
+			data = ((RFXComBaseMessage) obj).decodeMessage();
 
 		if( data == null ) {
 			throw new IllegalArgumentException("No valid encoder implemented!");
@@ -128,8 +126,24 @@ public class RFXComMessageUtils {
 
 		switch (packetType) {
 
+		case LIGHTING1:
+			for (RFXComLighting1Message.SubType s : RFXComLighting1Message.SubType.values()) {
+				if (s.toString().equals(subType)) {
+					return s;
+				}
+			}
+			break;
+
 		case LIGHTING2:
-			for (SubType s : RFXComLighting2Message.SubType.values()) {
+			for (RFXComLighting2Message.SubType s : RFXComLighting2Message.SubType.values()) {
+				if (s.toString().equals(subType)) {
+					return s;
+				}
+			}
+			break;
+
+		case CURTAIN1:
+			for (RFXComCurtain1Message.SubType s : RFXComCurtain1Message.SubType.values()) {
 				if (s.toString().equals(subType)) {
 					return s;
 				}
@@ -149,4 +163,6 @@ public class RFXComMessageUtils {
 
 		throw new IllegalArgumentException("Unknown sub type " + subType);
 	}
+	
+	
 }

@@ -263,6 +263,7 @@
 		<version>${project.version}</version>
 		<type>jar</type>
 	</dependency>
+<<<<<<< mine
 	<dependency>
 		<groupId>org.openhab.binding</groupId>
 		<artifactId>org.openhab.binding.koubachi</artifactId>
@@ -270,6 +271,21 @@
 		<type>jar</type>
 	</dependency>
 			
+=======
+	<dependency>
+		<groupId>org.openhab.binding</groupId>
+		<artifactId>org.openhab.binding.pulseaudio</artifactId>
+		<version>${project.version}</version>
+		<type>jar</type>
+	</dependency>
+	<dependency>
+		<groupId>org.openhab.binding</groupId>
+		<artifactId>org.openhab.binding.homematic</artifactId>
+		<version>${project.version}</version>
+		<type>jar</type>
+	</dependency>
+		
+>>>>>>> theirs
     <dependency>
 		  <groupId>org.openhab.io</groupId>
 		  <artifactId>org.openhab.io.multimedia.tts.freetts</artifactId>

@@ -1,6 +1,6 @@
 /**
  * openHAB, the open Home Automation Bus.
- * Copyright (C) 2010-2012, openHAB.org <admin@openhab.org>
+ * Copyright (C) 2010-2013, openHAB.org <admin@openhab.org>
  *
  * See the contributors.txt file in the distribution for a
  * full listing of individual contributors.
@@ -26,8 +26,11 @@
  * (EPL), the licensors of this Program grant you additional permission
  * to convey the resulting work.
  */
-
 package org.openhab.binding.rfxcom.internal.messages;
+
+import java.math.BigDecimal;
+
+import org.openhab.core.library.types.PercentType;
 
 /**
  * RFXCOM data class for lighting2 message.
@@ -38,8 +41,8 @@ package org.openhab.binding.rfxcom.internal.messages;
 public class RFXComLighting2Message extends RFXComBaseMessage {
 
 	public enum Commands {
-		ON(0),
-		OFF(1),
+		OFF(0),
+		ON(1),
 		SET_LEVEL(2),
 		GROUP_OFF(3),
 		GROUP_ON(4),
@@ -60,38 +63,6 @@ public class RFXComLighting2Message extends RFXComBaseMessage {
 		}
 	}
 
-	public enum DimmingLevel {
-		LEVEL0(0),
-		LEVEL6(1),
-		LEVEL12(2),
-		LEVEL18(3),
-		LEVEL24(4),
-		LEVEL30(5),
-		LEVEL36(6),
-		LEVEL42(7),
-		LEVEL48(8),
-		LEVEL54(9),
-		LEVEL60(10),
-		LEVEL66(11),
-		LEVEL72(12),
-		LEVEL78(13),
-		LEVEL84(14),
-		LEVEL100(15);
-
-		private final int level;
-
-		DimmingLevel(int level) {
-			this.level = level;
-		}
-
-		DimmingLevel(byte level) {
-			this.level = level;
-		}
-
-		public byte toByte() {
-			return (byte) level;
-		}
-	}
 
 	public enum SubType {
 		AC(0),
@@ -116,8 +87,8 @@ public class RFXComLighting2Message extends RFXComBaseMessage {
 	public SubType subType = SubType.AC;
 	public int sensorId = 0;
 	public byte unitcode = 0;
-	public Commands command = Commands.ON;
-	public DimmingLevel dimmingLevel = DimmingLevel.LEVEL0;
+	public Commands command = Commands.OFF;
+	public byte dimmingLevel = 0;
 	public byte signalLevel = 0;
 
 	public RFXComLighting2Message() {
@@ -155,7 +126,7 @@ public class RFXComLighting2Message extends RFXComBaseMessage {
 				| (data[6] & 0xFF) << 8 | (data[7] & 0xFF);
 		unitcode = data[8];
 		command = Commands.values()[data[9]];
-		dimmingLevel = DimmingLevel.values()[data[10]];
+		dimmingLevel = data[10];
 		signalLevel = (byte) ((data[11] & 0xF0) >> 4);
 	}
 
@@ -175,10 +146,50 @@ public class RFXComLighting2Message extends RFXComBaseMessage {
 
 		data[8] = unitcode;
 		data[9] = command.toByte();
-		data[10] = dimmingLevel.toByte();
+		data[10] = dimmingLevel;
 		data[11] = (byte) ((signalLevel & 0x0F) << 4);
 
 		return data;
 	}
+	
+	@Override
+	public String generateDeviceId() {
+		 return sensorId + "." + unitcode;
+	}
+
+	
+
+	/**
+	 * Convert a 0-15 scale value to a percent type.
+	 * 
+	 * @param pt
+	 *            percent type to convert
+	 * @return converted value 0-15
+	 */
+	public static int getDimLevelFromPercentType(PercentType pt) {
+		return pt
+				.toBigDecimal()
+				.multiply(BigDecimal.valueOf(15))
+				.divide(PercentType.HUNDRED.toBigDecimal(), 0,
+						BigDecimal.ROUND_UP).intValue();
+	}
+
+	/**
+	 * Convert a 0-15 scale value to a percent type.
+	 * 
+	 * @param pt
+	 *            percent type to convert
+	 * @return converted value 0-15
+	 */
+	public static PercentType getPercentTypeFromDimLevel(int value) {
+		value = Math.min(value, 15);
+		
+		return new PercentType(BigDecimal
+				.valueOf(value)
+				.multiply(BigDecimal.valueOf(100))
+				.divide(BigDecimal.valueOf(15), 0,
+						BigDecimal.ROUND_UP).intValue());
+	}
+	
 
 }
