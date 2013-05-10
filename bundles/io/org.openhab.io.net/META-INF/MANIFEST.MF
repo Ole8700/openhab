@@ -1,0 +1,35 @@
+Manifest-Version: 1.0
+Bundle-ManifestVersion: 2
+Bundle-Name: openHAB Net I/O Bundle
+Bundle-SymbolicName: org.openhab.io.net
+Bundle-Version: 1.3.0.qualifier
+Bundle-Vendor: openHAB.org
+Bundle-RequiredExecutionEnvironment: J2SE-1.5
+Eclipse-RegisterBuddy: org.openhab.core.drools
+Import-Package: javax.mail,
+ javax.mail.internet,
+ javax.servlet;version="2.6.0",
+ javax.servlet.http;version="2.6.0",
+ org.apache.commons.codec.net;version="1.3.0",
+ org.apache.commons.httpclient,
+ org.apache.commons.httpclient.auth,
+ org.apache.commons.httpclient.methods,
+ org.apache.commons.httpclient.params,
+ org.apache.commons.io,
+ org.apache.commons.lang,
+ org.apache.commons.net.util,
+ org.eclipse.jetty.plus.jaas.callback;resolution:=optional,
+ org.eclipse.jetty.plus.jaas.spi;resolution:=optional,
+ org.openhab.io.console,
+ org.osgi.service.cm,
+ org.osgi.service.http,
+ org.slf4j
+Bundle-ClassPath: .,
+ lib/commons-email-1.2.jar,
+ lib/jProwlAPI-0.5.jar,
+ lib/smack-3.2.2.jar,
+ lib/smackx-3.2.2.jar,
+ lib/smackx-jingle-3.2.2.jar
+Export-Package: org.openhab.io.net.actions,
+ org.openhab.io.net.http
+Service-Component: OSGI-INF/mailaction.xml, OSGI-INF/xmppsupport.xml, OSGI-INF/prowlaction.xml, OSGI-INF/securehttpcontext.xml
