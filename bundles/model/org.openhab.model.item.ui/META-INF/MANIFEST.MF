@@ -18,6 +18,7 @@ Import-Package: org.apache.log4j,
  org.openhab.designer.ui,
  org.osgi.service.event
 Export-Package: org.openhab.model.ui.contentassist.antlr,
- org.openhab.model.ui.contentassist
+ org.openhab.model.ui.contentassist,
+ org.openhab.model.ui.quickfix
 Bundle-RequiredExecutionEnvironment: JavaSE-1.6
 Bundle-Activator: org.openhab.model.ui.internal.ItemsActivator

@@ -13,7 +13,7 @@ RuleModel:
 	(rules += Rule)*;
 	
 Import:
-	'import' importedNamespace=QualifiedNameWithWildCard
+	'import' importedNamespace=QualifiedNameWithWildcard
 ;
 		
 Rule:
@@ -63,7 +63,7 @@ SystemOnShutdownTrigger:
 	'System' 'shuts down'
 ;
 
-QualifiedNameWithWildCard :
+QualifiedNameWithWildcard :
 	QualifiedName  ('.' '*')?;
 	
 ItemName :
