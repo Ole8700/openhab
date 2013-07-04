@@ -39,5 +39,6 @@ Import-Package: org.apache.commons.lang,
 Bundle-RequiredExecutionEnvironment: J2SE-1.5
 Export-Package: org.openhab.model.script.ui.contentassist,
  org.openhab.model.script.ui.contentassist.antlr,
- org.openhab.model.script.ui.internal
+ org.openhab.model.script.ui.internal,
+ org.openhab.model.script.ui.quickfix
 Bundle-Activator: org.openhab.model.script.ui.internal.ScriptActivator

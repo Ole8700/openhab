@@ -31,7 +31,6 @@ package org.openhab.model.script.interpreter;
 import org.eclipse.xtext.common.types.JvmIdentifiableElement;
 import org.eclipse.xtext.naming.QualifiedName;
 import org.eclipse.xtext.util.CancelIndicator;
-import org.eclipse.xtext.util.PolymorphicDispatcher;
 import org.eclipse.xtext.xbase.XAbstractFeatureCall;
 import org.eclipse.xtext.xbase.XAssignment;
 import org.eclipse.xtext.xbase.XFeatureCall;
@@ -64,12 +63,10 @@ public class ScriptInterpreter extends XbaseInterpreter {
 	
 	@Inject
 	StateAndCommandProvider stateAndCommandProvider;
-		
-	private PolymorphicDispatcher<Object> featureCallDispatcher = createFeatureCallDispatcher();
 
-	protected Object _featureCallJvmIdentifyableElement(JvmIdentifiableElement identifiable, XFeatureCall featureCall, Object receiver,
+	protected Object _invokeFeature(JvmIdentifiableElement identifiable, XFeatureCall featureCall, Object receiver,
 			IEvaluationContext context, CancelIndicator indicator) {
-		Object value = super._featureCallJvmIdentifyableElement(identifiable, featureCall, receiver, context, indicator);
+		Object value = super._invokeFeature(identifiable, featureCall, receiver, context, indicator);
 		if(value==null && receiver==null) {
 			for(Type type : stateAndCommandProvider.getAllTypes()) {
 				if(type.toString().equals(featureCall.toString())) {
@@ -86,7 +83,7 @@ public class ScriptInterpreter extends XbaseInterpreter {
 		if(featureCall.getFeature().eIsProxy()) {
 			throw new RuntimeException("The name '" + featureCall.toString() + "' cannot be resolved to an item or type.");
 		}
-		return featureCallDispatcher.invoke(featureCall.getFeature(), featureCall, receiverObj, context, indicator);
+		return _invokeFeature(featureCall.getFeature(), featureCall, receiverObj, context, indicator);
 	}
 
 	protected Object _assignValue(XVariableDeclaration variable, XAssignment assignment, Object value,
